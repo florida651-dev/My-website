@@ -124,7 +124,8 @@
         sigma: 6,
         g_el: 2,
         rot_cm: {A: 9.57789, B: 9.57789, C: 4.74202},
-        vib_cm: [3004, 606, 3161, 1396], // minimal set for MVP; extend as needed
+        //Use fundamentals + degeneracy: [3004], [606], [3161 x2], [1396 x2]
+        vib_cm: [3004, 606, 3161, 3161, 1396, 1396],
       },
       "O3 (ozone, C2v)": {
         mass: 0.047997,
