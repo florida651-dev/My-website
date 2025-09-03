@@ -3,73 +3,88 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ThermoCalc Simulations</title>
-
-<nav class="help">
-  <a href="/" class="link">Home</a> ·
-  <a href="/methods.html" class="link">Methods &amp; Validation</a> ·
-  <a href="/purchase.html" class="link">Purchase</a>
-</nav>
-  
+<title>ThermoCalc — ThermoCalc Simulations</title>
 <style>
-  :root { --bg:#f7f9fc; --card:#fff; --ink:#0f172a; --muted:#475569; --accent:#2563eb; --line:#e2e8f0; }
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  header{display:flex;align-items:center;justify-content:space-between;max-width:960px;margin:32px auto 16px;padding:0 16px}
-  header h1{margin:0;font-weight:800;letter-spacing:.2px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 24px rgba(15,23,42,.06);max-width:960px;margin:0 auto 28px;padding:24px}
+  :root{
+    --bg:#f7f9fc; --card:#fff; --ink:#0f172a; --muted:#475569; --accent:#2563eb; --line:#e2e8f0;
+    --shadow:0 6px 24px rgba(15,23,42,.06); --radius:16px; --radius-sm:10px; --max:960px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  .container{max-width:var(--max);margin:32px auto;padding:0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin:0 0 24px}
+
+  /* Header + nav (same as methods.html) */
+  .site-header{display:flex;align-items:center;justify-content:space-between}
+  .site-title{margin:0;font-weight:800;letter-spacing:.2px;font-size:34px}
+  .nav a{color:var(--muted);text-decoration:none;margin-left:14px}
+  .nav a:hover{color:var(--ink)}
+  .nav a[aria-current="page"]{color:var(--ink);font-weight:700;text-underline-offset:3px;text-decoration:underline}
+
+  /* Controls & table */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  @media (max-width:800px){ .grid{grid-template-columns:1fr} }
   .field{display:flex;flex-direction:column;gap:6px}
   label{font-weight:600}
   input,select{appearance:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;font-size:16px}
-  .help{color:var(--muted);font-size:14px}
   .btn{display:inline-block;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-  table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
-  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
-  th{background:#f8fafc;font-weight:700}
-  footer{max-width:960px;margin:8px auto 40px;color:var(--muted);text-align:center}
-  @media (max-width:800px){ .grid{grid-template-columns:1fr} }
+  .help{color:var(--muted);font-size:14px}
+
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{background:#f8fafc}
+  footer{color:var(--muted);text-align:center;margin:16px 0 32px}
 </style>
 </head>
 <body>
-  <header>
-    <h1>ThermoCalc Simulations</h1>
-    <nav class="help">© <span id="yr"></span> ThermoCalc Simulations</nav>
+  <!-- Unified header -->
+  <header class="container site-header">
+    <h1 class="site-title">ThermoCalc</h1>
+    <nav class="nav">
+      <a href="/" aria-current="page">Home</a>
+      <a href="/methods.html">Methods &amp; Validation</a>
+      <a href="/purchase.html">Purchase</a>
+    </nav>
   </header>
 
-<section class="card">
-    <h2 style="margin-top:0">Thermodynamic Calculations of Basic Compounds (CO, O₂, CH₄, & NH₃) </h2>
-    <p class="help" style="margin-top:-6px">Using RRHO approximations. Standard pressure fixed to <b>101 325 Pa</b>.</p>
+  <main class="container">
+    <section class="card">
+      <h2 style="margin-top:0">Thermodynamic Calculations of Basic Compounds (CO, O₂, CH₄, &amp; NH₃)</h2>
+      <p class="help" style="margin-top:-6px">Using RRHO approximations. Standard pressure fixed to <b>101&nbsp;325&nbsp;Pa</b>.</p>
 
-    <div class="grid" style="margin-top:8px">
-      <div class="field">
-        <label for="mol">Molecule</label>
-        <select id="mol">
-          <option value="CO">CO</option>
-          <option value="O2">O₂</option>
-          <option value="CH4">CH₄</option>
-          <option value="NH3">NH₃</option>
-        </select>
+      <div class="grid" style="margin-top:8px">
+        <div class="field">
+          <label for="mol">Molecule</label>
+          <select id="mol">
+            <option value="CO">CO</option>
+            <option value="O2">O₂</option>
+            <option value="CH4">CH₄</option>
+            <option value="NH3">NH₃</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="temp">Temperature (K)</label>
+          <input id="temp" type="number" step="0.01" min="0.000001" value="298.15" />
+        </div>
+
+        <div class="field" style="align-self:end">
+          <button class="btn" id="calc">Calculate</button>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="temp">Temperature (K)</label>
-        <input id="temp" type="number" step="0.01" min="0.000001" value="298.15" />
+      <div style="margin-top:20px">
+        <table>
+          <thead>
+            <tr><th>Property</th><th>Value</th><th>Unit</th></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
       </div>
-
-      <div class="field" style="align-self:end">
-        <button class="btn" id="calc">Calculate</button>
-      </div>
-    </div>
-
-    <div style="margin-top:20px">
-      <table>
-        <thead>
-          <tr><th>Property</th><th>Value</th><th>Unit</th></tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-  </section>
+    </section>
+    <footer>© <span id="yr"></span> ThermoCalc Simulations</footer>
+  </main>
 
 <script>
 // ===== Constants =====
@@ -261,12 +276,14 @@ function thermoRRHO(mol,T){
   return {Cp,Cv,S,U,H};
 }
 
-// ===== Dataset =====
+// ===== Dataset (O3 removed per your decision) =====
 const molecules={
   CO:{name:"CO",kind:"linear",M_kg_per_mol:0.02801,sigma:1,Brot_cm1:1.92253,vib_cm1:[2143],electronic:[{g:1,Te_cm1:0}]},
   O2:{name:"O2",kind:"linear",M_kg_per_mol:0.031999,sigma:2,Brot_cm1:1.43768,vib_cm1:[1556],electronic:[{g:3,Te_cm1:0}]},
-  O3:{name:"O3",kind:"nonlinear",M_kg_per_mol:0.047997,sigma:2,A_cm1:3.55348,B_cm1:0.44525,C_cm1:0.39479,vib_cm1:[1110,705,1042],electronic:[{g:1,Te_cm1:0}]},
-  NH3:{name:"NH3",kind:"nonlinear",M_kg_per_mol:0.0170306,sigma:3,A_cm1:9.4443,B_cm1:9.4443,C_cm1:6.196,vib_cm1:[3337,950,3444,1627],electronic:[{g:1,Te_cm1:0}]}
+  CH4:{name:"CH4",kind:"nonlinear",M_kg_per_mol:0.016042,sigma:12,A_cm1:5.2412,B_cm1:5.2412,C_cm1:5.2412,
+       vib_cm1:[2917, 1534,1534, 3019,3019,3019, 1306,1306,1306], electronic:[{g:1,Te_cm1:0}]},
+  NH3:{name:"NH3",kind:"nonlinear",M_kg_per_mol:0.0170306,sigma:3,A_cm1:9.4443,B_cm1:9.4443,C_cm1:6.196,
+       vib_cm1:[3337,950,3444,1627], electronic:[{g:1,Te_cm1:0}]}
 };
 
 // ===== UI =====
@@ -281,16 +298,16 @@ function computeAndRender(){
   const mol=molecules[key]; if(!mol||!(T>0)) return;
   const r=thermoRRHO(mol,T);
 
-  // Display Cp, Cv, S in J/(mol·K); U, H in kJ/mol
   const rows=[
-    ["C<sub>P</sub>",format(r.Cp),"J/(mol·K)"],
-    ["C<sub>V</sub>",format(r.Cv),"J/(mol·K)"],
-    ["S" ,format(r.S ),"J/(mol·K)"],
-    ["U" ,format(r.U/1000,3),"kJ/mol"],
-    ["H" ,format(r.H/1000,3),"kJ/mol"]
+    ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
+    ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
+    ["S",             format(r.S ), "J/(mol·K)"],
+    ["U",             format(r.U/1000,3), "kJ/mol"],
+    ["H",             format(r.H/1000,3), "kJ/mol"]
   ];
   tbody.innerHTML=rows.map(([k,v,u])=>`<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`).join("");
 }
 </script>
 </body>
 </html>
+
