@@ -40,7 +40,9 @@
         <!-- show proper subscript using the Unicode CO₂; value is plain "CO2" -->
         <select id="mol">
           <option value="CO">CO</option>
+          <option value="O2">O₂</option>
           <option value="O3">O₃</option>
+          <option value="NH3">NH₃</option>
         </select>
       </div>
 
@@ -243,10 +245,9 @@ function thermoRRHO(mol, T, opts={}){
 // ===== Example dataset =====
 const molecules = {
   CO:  { name:"CO",  kind:"linear",    M_kg_per_mol:0.02801, sigma:1, Brot_cm1:1.92253,  vib_cm1:[2143] },
-  CO2: { name:"CO2", kind:"linear",    M_kg_per_mol:0.0440095, sigma:2, Brot_cm1:0.39021, vib_cm1:[1333.0,667.0,667.0,2349.0] },
-  HCl: { name:"HCl", kind:"linear",    M_kg_per_mol:0.0364609, sigma:1, Brot_cm1:10.593, vib_cm1:[2886.0] },
+  O2: { name:"O2", kind:"linear",    M_kg_per_mol:0.031999, sigma:2, Brot_cm1:1.43768, vib_cm1:[1556] },
   O3: { name:"O3", kind:"nonlinear", M_kg_per_mol:0.047997, sigma:2, A_cm1:3.55348, B_cm1:0.44525, C_cm1:0.39479, vib_cm1:[1110,705,1042] },
-  H2O: { name:"H2O", kind:"nonlinear", M_kg_per_mol:0.01801528, sigma:2, A_cm1:27.877, B_cm1:14.512, C_cm1:9.285, vib_cm1:[3657,1595,3756] },
+  NH3: { name:"NH3", kind:"nonlinear", M_kg_per_mol:0.0170306, sigma:3, A_cm1:9.4443, B_cm1:9.4443, C_cm1:6.196, vib_cm1:[3337,950,3444,1627] },
 };
 
 // ===== UI wiring =====
