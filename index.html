@@ -19,7 +19,6 @@
   table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
   th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
   th{background:#f8fafc;font-weight:700}
-  tfoot td{font-weight:600}
   footer{max-width:960px;margin:8px auto 40px;color:var(--muted);text-align:center}
   @media (max-width:800px){ .grid{grid-template-columns:1fr} }
 </style>
@@ -67,13 +66,13 @@
 
 <script>
 // ===== Constants =====
-const R  = 8.31446261815324;
-const kB = 1.380649e-23;
-const h  = 6.62607015e-34;
-const c  = 299792458;
-const NA = 6.02214076e23;
+const R  = 8.31446261815324;   // J/(mol·K)
+const kB = 1.380649e-23;       // J/K
+const h  = 6.62607015e-34;     // J·s
+const c  = 299792458;          // m/s
+const NA = 6.02214076e23;      // 1/mol
 const PI = Math.PI;
-const P_STD = 1.01325e5;
+const P_STD = 1.01325e5;       // 1 atm
 
 // ===== Helpers =====
 function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }
@@ -107,25 +106,30 @@ function S_vib(T, theta_v){
   return R*s;
 }
 
-// ===== Translation =====
+// ===== Translation (Sackur–Tetrode, molar) =====
 function U_trans(T){ return 1.5*R*T; }
 function Cv_trans(){ return 1.5*R; }
 function S_trans(T,p,M){
-  const m=M/NA;
-  const factor=Math.pow((2*PI*m*kB*T)/(h*h),1.5)*(kB*T/p)*NA;
+  const m = M/NA; // single-molecule mass
+  // S = R [ ln( (2π m kT / h^2)^{3/2} * (kT / p) ) + 5/2 ]
+  const factor = Math.pow((2*PI*m*kB*T)/(h*h),1.5) * (kB*T/p);
   return R*(Math.log(factor)+2.5);
 }
 
-// ===== Electronics =====
+// ===== Electronics (degeneracies + optional excited states) =====
 function electronicContrib(T, states){
-  let Z=0,M1=0,M2=0;
+  // states: [{g, Te_cm1}] (Te=0 for ground)
+  let Z=0, M1=0, M2=0;
   for(const s of states){
-    const E=thetaFromCm1(s.Te_cm1);
-    const w=s.g*Math.exp(-E/T);
-    Z+=w; M1+=E*w; M2+=E*E*w;
+    const E = thetaFromCm1(s.Te_cm1); // in K
+    const w = s.g * Math.exp(-E/T);
+    Z += w; M1 += E*w; M2 += E*E*w;
   }
-  const lnq=Math.log(Z), Ebar=M1/Z, varE=Math.max(0,M2/Z - Ebar*Ebar);
-  const U=R*Ebar, Cv=R*(varE/(T*T)), S=R*lnq+U/T;
+  const lnq = Math.log(Z);
+  const Ebar = M1/Z, varE = Math.max(0, M2/Z - Ebar*Ebar);
+  const U = R*Ebar;                // J/mol
+  const Cv = R*(varE/(T*T));       // J/(mol·K)
+  const S = R*lnq + U/T;           // J/(mol·K)
   return {U,Cv,S};
 }
 
@@ -137,10 +141,10 @@ function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=200){
     const JJ1=J*(J+1), g=(2*J+1), E=theta_r*JJ1;
     const w=g*Math.exp(-E/Tpos);
     Z+=w; M1+=E*w; M2+=E*E*w;
-    if(w<relTol*Math.max(Z,1)&&J>5) break;
+    if(w<relTol*Math.max(Z,1) && J>5) break;
   }
   const lnq=Math.log(Z/sigma), Ebar=M1/Z, varE=Math.max(0,M2/Z - Ebar*Ebar);
-  const U=R*Ebar, Cv=R*(varE/(Tpos*Tpos)), S=R*lnq+U/Tpos;
+  const U=R*Ebar, Cv=R*(varE/(Tpos*Tpos)), S=R*lnq + U/Tpos;
   return {U,Cv,S};
 }
 
@@ -178,27 +182,43 @@ function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,ne
       const B=thetaB,A=thetaA,delta=A-B;
       for(let J=0;J<=Jcap;J++){
         const base=B*J*(J+1);
-        for(let K=-J;K<=J;K++){const E=base+delta*K*K,gM=(2*J+1),w=gM*Math.exp(-E/Tpos);Z+=w;M1+=E*w;M2+=E*E*w;}
+        for(let K=-J;K<=J;K++){
+          const E=base+delta*K*K, gM=(2*J+1), w=gM*Math.exp(-E/Tpos);
+          Z+=w; M1+=E*w; M2+=E*E*w;
+        }
       }
     }else{
       const B=thetaA,C=thetaC,delta=C-B;
       for(let J=0;J<=Jcap;J++){
         const base=B*J*(J+1);
-        for(let K=-J;K<=J;K++){const E=base+delta*K*K,gM=(2*J+1),w=gM*Math.exp(-E/Tpos);Z+=w;M1+=E*w;M2+=E*E*w;}
+        for(let K=-J;K<=J;K++){
+          const E=base+delta*K*K, gM=(2*J+1), w=gM*Math.exp(-E/Tpos);
+          Z+=w; M1+=E*w; M2+=E*E*w;
+        }
       }
     }
   }else{
     for(let J=0;J<=Jcap;J++){
-      const n=2*J+1,H=Array.from({length:n},()=>Array(n).fill(0));
-      for(let K=-J;K<=J;K++){const idx=K+J;H[idx][idx]=0.5*(thetaA+thetaB)*(J*(J+1)-K*K)+thetaC*K*K;}
+      const n=2*J+1, H=Array.from({length:n},()=>Array(n).fill(0));
+      for(let K=-J;K<=J;K++){
+        const idx=K+J;
+        H[idx][idx]=0.5*(thetaA+thetaB)*(J*(J+1)-K*K)+thetaC*K*K;
+      }
       const pref=0.25*(thetaA-thetaB);
-      for(let K=-J;K<=J-2;K++){const idx=K+J,idx2=K+2+J;const f=Math.sqrt((J-K)*(J+K+1)*(J-K-1)*(J+K+2));const val=pref*f;H[idx][idx2]+=val;H[idx2][idx]+=val;}
+      for(let K=-J;K<=J-2;K++){
+        const idx=K+J, idx2=K+2+J;
+        const f=Math.sqrt((J-K)*(J+K+1)*(J-K-1)*(J+K+2));
+        const val=pref*f; H[idx][idx2]+=val; H[idx2][idx]+=val;
+      }
       const evals=eigSymmetricJacobi(H), gM=(2*J+1);
-      for(const E of evals){const w=gM*Math.exp(-E/Tpos);Z+=w;M1+=E*w;M2+=E*E*w;}
+      for(const E of evals){
+        const w=gM*Math.exp(-E/Tpos);
+        Z+=w; M1+=E*w; M2+=E*E*w;
+      }
     }
   }
   const lnq=Math.log(Z/sigma), Ebar=M1/Z, varE=Math.max(0,M2/Z - Ebar*Ebar);
-  const U=R*Ebar,Cv=R*(varE/(Tpos*Tpos)),S=R*lnq+U/Tpos;
+  const U=R*Ebar, Cv=R*(varE/(Tpos*Tpos)), S=R*lnq + U/Tpos;
   return {U,Cv,S};
 }
 
@@ -221,13 +241,16 @@ function thermoRRHO(mol,T){
   }
 
   let Uel=0,Cvel=0,Sel=0;
-  if(mol.electronic){const el=electronicContrib(T,mol.electronic);Uel=el.U;Cvel=el.Cv;Sel=el.S;}
+  if(mol.electronic){
+    const el=electronicContrib(T,mol.electronic);
+    Uel=el.U; Cvel=el.Cv; Sel=el.S;
+  }
 
-  const U=Ut+Ur+Uv+Uel;
-  const Cv=Cvt+Cvr+Cvv+Cvel;
-  const Cp=Cv+R;
-  const S=St+Sr+Sv+Sel;
-  const H=U+R*T;
+  const U = Ut + Ur + Uv + Uel;   // J/mol
+  const Cv = Cvt + Cvr + Cvv + Cvel;
+  const Cp = Cv + R;
+  const S  = St + Sr + Sv + Sel;
+  const H  = U + R*T;              // J/mol
   return {Cp,Cv,S,U,H};
 }
 
@@ -250,12 +273,14 @@ function computeAndRender(){
   const key=molSel.value, T=parseFloat(tempEl.value);
   const mol=molecules[key]; if(!mol||!(T>0)) return;
   const r=thermoRRHO(mol,T);
+
+  // Display Cp, Cv, S in J/(mol·K); U, H in kJ/mol
   const rows=[
     ["Cp",format(r.Cp),"J/(mol·K)"],
     ["Cv",format(r.Cv),"J/(mol·K)"],
-    ["S",format(r.S),"J/(mol·K)"],
-    ["U",format(r.U),"J/mol"],
-    ["H",format(r.H),"J/mol"]
+    ["S" ,format(r.S ),"J/(mol·K)"],
+    ["U" ,format(r.U/1000,3),"kJ/mol"],
+    ["H" ,format(r.H/1000,3),"kJ/mol"]
   ];
   tbody.innerHTML=rows.map(([k,v,u])=>`<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`).join("");
 }
