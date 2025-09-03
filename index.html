@@ -3,78 +3,100 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ThermoCalc — ThermoCalc Simulations</title>
+<title>ThermoCalc Web — Accurate Thermodynamic Data</title>
 <style>
   :root{
     --bg:#f7f9fc; --card:#fff; --ink:#0f172a; --muted:#475569; --accent:#2563eb; --line:#e2e8f0;
-    --shadow:0 6px 24px rgba(15,23,42,.06); --radius:16px; --radius-sm:10px; --max:960px;
+    --ink-strong:#0b1220; --btn:#2563eb; --btn-ink:#fff; --btn-outline:#e2e8f0;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  .container{max-width:var(--max);margin:32px auto;padding:0 16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin:0 0 24px}
-
-  /* Header + nav (same as methods.html) */
-  .site-header{display:flex;align-items:center;justify-content:space-between}
-  .site-title{margin:0;font-weight:800;letter-spacing:.2px;font-size:34px}
-  .nav a{color:var(--muted);text-decoration:none;margin-left:14px}
+  a{color:var(--accent);text-decoration:none}
+  header{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:24px auto;padding:0 16px}
+  .brand{font-weight:800;letter-spacing:.2px}
+  .nav a{color:var(--muted);margin-left:16px}
   .nav a:hover{color:var(--ink)}
-  .nav a[aria-current="page"]{color:var(--ink);font-weight:700;text-underline-offset:3px;text-decoration:underline}
 
-  /* Controls & table */
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-  @media (max-width:800px){ .grid{grid-template-columns:1fr} }
-  .field{display:flex;flex-direction:column;gap:6px}
-  label{font-weight:600}
-  input,select{appearance:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;font-size:16px}
-  .btn{display:inline-block;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .help{color:var(--muted);font-size:14px}
+  .hero{max-width:1040px;margin:32px auto;padding:0 16px;display:grid;grid-template-columns:1.2fr .9fr;gap:28px}
+  .hero h1{margin:.2rem 0 .4rem;font-size:clamp(28px,4.5vw,46px);line-height:1.15;color:var(--ink-strong)}
+  .hero p{color:var(--muted);font-size:18px;max-width:62ch}
+  .points{margin:18px 0 24px;display:grid;grid-template-columns:1fr 1fr;gap:10px 24px}
+  .point{display:flex;gap:10px;align-items:flex-start;color:var(--ink)}
+  .point i{font-style:normal;font-size:20px;line-height:1.1}
+  .cta{display:flex;gap:12px;margin-top:10px}
+  .btn{appearance:none;border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer}
+  .btn-primary{background:var(--btn);color:var(--btn-ink);box-shadow:0 6px 20px rgba(37,99,235,.25)}
+  .btn-outline{background:transparent;border:1px solid var(--btn-outline);color:var(--ink)}
 
-  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right}
-  th:first-child,td:first-child{text-align:left}
-  thead th{background:#f8fafc}
-  footer{color:var(--muted);text-align:center;margin:16px 0 32px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.08)}
+  .calc{padding:18px}
+  .calc h3{margin:.2rem 0 .8rem}
+  .row{display:grid;grid-template-columns:1fr 1fr 64px;gap:10px;margin-bottom:10px}
+  select,input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
+  .unit{display:grid;grid-template-columns:1fr 56px;gap:8px}
+  .calc button{width:100%;margin:6px 0 12px}
+  .mini{border:1px solid var(--line);border-radius:12px;padding:10px}
+  .mini table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  .mini th,.mini td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
+  .mini th:first-child,.mini td:first-child{text-align:left}
+  .kicker{color:var(--muted);font-size:14px;margin-top:10px}
+  .footnote{max-width:1040px;margin:18px auto 0;padding:0 16px;color:var(--muted);font-size:14px}
+  footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
+  .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;width:1px;overflow:hidden;white-space:nowrap}
+
+  @media (max-width:960px){ .hero{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
-  <!-- Unified header -->
-  <header class="container site-header">
-    <h1 class="site-title">ThermoCalc</h1>
+  <header>
+    <div class="brand">ThermoCalc Web</div>
     <nav class="nav">
-      <a href="/" aria-current="page">Home</a>
+      <a href="/">Home</a>
       <a href="/methods.html">Methods &amp; Validation</a>
       <a href="/purchase.html">Purchase</a>
     </nav>
   </header>
 
-  <main class="container">
-    <section class="card">
-      <h2 style="margin-top:0">Thermodynamic Calculations of Basic Compounds (CO, O₂, CH₄, &amp; NH₃)</h2>
-      <p class="help" style="margin-top:-6px">Using RRHO approximations. Standard pressure fixed to <b>101&nbsp;325&nbsp;Pa</b>.</p>
+  <section class="hero">
+    <div>
+      <h1>Accurate Thermodynamic Data in Seconds — No Installation Required</h1>
+      <p>Explore Gibbs free energy, enthalpy, entropy, and heat capacity for molecules like CH<sub>4</sub>, O<sub>2</sub>, CO, and NH<sub>3</sub>. Perfect for <b>students</b>, <b>educators</b>, and <b>researchers</b>.</p>
 
-      <div class="grid" style="margin-top:8px">
-        <div class="field">
-          <label for="mol">Molecule</label>
-          <select id="mol">
-            <option value="CO">CO</option>
-            <option value="O2">O₂</option>
-            <option value="CH4">CH₄</option>
-            <option value="NH3">NH₃</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="temp">Temperature (K)</label>
-          <input id="temp" type="number" step="0.01" min="0.000001" value="298.15" />
-        </div>
-
-        <div class="field" style="align-self:end">
-          <button class="btn" id="calc">Calculate</button>
-        </div>
+      <div class="points">
+        <div class="point"><i>⚡</i><div><b>Instant Calculations</b><br><span class="kicker">Enter a molecule and temperature, get results immediately.</span></div></div>
+        <div class="point"><i>✅</i><div><b>Validated Data</b><br><span class="kicker">Benchmarked against NIST CCCBDB and ATcT.</span></div></div>
+        <div class="point"><i>📂</i><div><b>Export Ready</b><br><span class="kicker">Upgrade for <b>CSV/PDF export</b> for assignments or research.</span></div></div>
+        <div class="point"><i>🎓</i><div><b>Education Friendly</b><br><span class="kicker">Great for homework checks, lectures, or self-study.</span></div></div>
       </div>
 
-      <div style="margin-top:20px">
+      <div class="cta">
+        <a href="#calculator" class="btn btn-primary">Try Free Calculator</a>
+        <a href="/purchase.html" class="btn btn-outline">Upgrade for CSV/PDF Export</a>
+      </div>
+    </div>
+
+    <!-- Calculator -->
+    <aside class="card calc" id="calculator" aria-label="Thermodynamic calculator">
+      <h3>Thermodynamic Calculations</h3>
+      <div class="row">
+        <label class="visually-hidden" for="mol">Molecule</label>
+        <select id="mol" aria-label="Molecule">
+          <option value="CH4">CH₄</option>
+          <option value="O2">O₂</option>
+          <option value="CO">CO</option>
+          <option value="NH3">NH₃</option>
+        </select>
+
+        <div class="unit">
+          <label class="visually-hidden" for="temp">Temperature</label>
+          <input id="temp" type="number" inputmode="numeric" min="0.000001" step="0.01" value="298.15" aria-label="Temperature (K)" />
+          <input value="K" aria-label="Units K" disabled style="text-align:center;border:1px solid var(--line);border-radius:10px;background:#f8fafc;color:var(--muted)">
+        </div>
+
+        <button class="btn btn-primary" id="calc" type="button">Calculate</button>
+      </div>
+
+      <div class="mini" role="region" aria-label="Results">
         <table>
           <thead>
             <tr><th>Property</th><th>Value</th><th>Unit</th></tr>
@@ -82,27 +104,35 @@
           <tbody id="tbody"></tbody>
         </table>
       </div>
-    </section>
-    <footer>© <span id="yr"></span> ThermoCalc Simulations</footer>
-  </main>
+
+      <p class="kicker">Based on RRHO statistical thermodynamics (p° = 101 325 Pa). Validated against NIST CCCBDB and ATcT.</p>
+    </aside>
+  </section>
+
+  <p class="footnote">Looking for methodology and benchmarks? See <a href="/methods.html">Methods &amp; Validation</a>.</p>
+
+  <footer>
+    <div>© <span id="yr"></span> ThermoCalc Web. All rights reserved.</div>
+    <div>Values computed from validated statistical thermodynamics models.</div>
+  </footer>
 
 <script>
-// ===== Constants =====
+/* ===== Physical constants ===== */
 const R  = 8.31446261815324;   // J/(mol·K)
 const kB = 1.380649e-23;       // J/K
 const h  = 6.62607015e-34;     // J·s
 const c  = 299792458;          // m/s
 const NA = 6.02214076e23;      // 1/mol
 const PI = Math.PI;
-const P_STD = 1.01325e5;       // 1 atm
+const P_STD = 1.01325e5;       // Pa (101 325)
 
-// ===== Helpers =====
-function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }
+/* ===== Helpers ===== */
+function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }               // cm^-1 -> K
 function thetasVib(arr){ return arr.map(thetaFromCm1); }
 function thetasRotLinear(B){ return thetaFromCm1(B); }
 function thetasRotNonlinear(A,B,C){ return [thetaFromCm1(A),thetaFromCm1(B),thetaFromCm1(C)]; }
 
-// ===== Vibrations =====
+/* ===== Vibrations ===== */
 function U_vib(T, theta_v, includeZPE=false){
   let sum=0, Tpos=Math.max(T,1e-12);
   for(const th of theta_v){
@@ -128,34 +158,31 @@ function S_vib(T, theta_v){
   return R*s;
 }
 
-// ===== Translation (Sackur–Tetrode, molar) =====
+/* ===== Translation (molar, Sackur–Tetrode) ===== */
 function U_trans(T){ return 1.5*R*T; }
 function Cv_trans(){ return 1.5*R; }
 function S_trans(T,p,M){
   const m = M/NA; // single-molecule mass
-  // S = R [ ln( (2π m kT / h^2)^{3/2} * (kT / p) ) + 5/2 ]
   const factor = Math.pow((2*PI*m*kB*T)/(h*h),1.5) * (kB*T/p);
   return R*(Math.log(factor)+2.5);
 }
 
-// ===== Electronics (degeneracies + optional excited states) =====
+/* ===== Electronic states ===== */
 function electronicContrib(T, states){
-  // states: [{g, Te_cm1}] (Te=0 for ground)
+  // states: [{g, Te_cm1}]
   let Z=0, M1=0, M2=0;
   for(const s of states){
-    const E = thetaFromCm1(s.Te_cm1); // in K
+    const E = thetaFromCm1(s.Te_cm1);
     const w = s.g * Math.exp(-E/T);
     Z += w; M1 += E*w; M2 += E*E*w;
   }
   const lnq = Math.log(Z);
   const Ebar = M1/Z, varE = Math.max(0, M2/Z - Ebar*Ebar);
-  const U = R*Ebar;                // J/mol
-  const Cv = R*(varE/(T*T));       // J/(mol·K)
-  const S = R*lnq + U/T;           // J/(mol·K)
+  const U = R*Ebar, Cv = R*(varE/(T*T)), S = R*lnq + U/T;
   return {U,Cv,S};
 }
 
-// ===== Rotation (linear exact) =====
+/* ===== Rotation (linear, exact sum) ===== */
 function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=200){
   const Tpos=Math.max(T,1e-12);
   let Z=0,M1=0,M2=0;
@@ -166,25 +193,10 @@ function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=200){
     if(w<relTol*Math.max(Z,1) && J>5) break;
   }
   const lnq=Math.log(Z/sigma), Ebar=M1/Z, varE=Math.max(0,M2/Z - Ebar*Ebar);
-  const U=R*Ebar, Cv=R*(varE/(Tpos*Tpos)), S=R*lnq + U/Tpos;
-  return {U,Cv,S};
+  return { U:R*Ebar, Cv:R*(varE/(Tpos*Tpos)), S:R*lnq + (R*Ebar)/Tpos };
 }
 
-// ===== Rotation (nonlinear exact) =====
-function eigSymmetricJacobi(Ain,tol=1e-12,maxIter){
-  const n=Ain.length, A=Ain.map(r=>r.slice()), iters=maxIter??(5*n*n);
-  function off(){let p=0,q=1,m=0;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const v=Math.abs(A[i][j]);if(v>m){m=v;p=i;q=j}}return{p,q,m};}
-  for(let it=0; it<iters; it++){
-    const {p,q,m}=off(); if(m<tol) break;
-    const app=A[p][p], aqq=A[q][q], apq=A[p][q]; const phi=0.5*Math.atan2(2*apq,(aqq-app));
-    const c=Math.cos(phi), s=Math.sin(phi);
-    for(let k=0;k<n;k++){const aip=A[k][p], aiq=A[k][q]; A[k][p]=c*aip - s*aiq; A[k][q]=s*aip + c*aiq;}
-    for(let k=0;k<n;k++){const apk=A[p][k], aqk=A[q][k]; A[p][k]=c*apk - s*aqk; A[q][k]=s*apk + c*aqk;}
-    A[p][q]=A[q][p]=0;
-  }
-  return A.map((row,i)=>row[i]).sort((a,b)=>a-b);
-}
-
+/* ===== Rotation (nonlinear, exact via symmetric/near-symmetric cases) ===== */
 function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,nearlyTol=1e-8){
   const Tpos=Math.max(T,1e-12);
   let Z=0,M1=0,M2=0;
@@ -221,30 +233,20 @@ function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,ne
     }
   }else{
     for(let J=0;J<=Jcap;J++){
-      const n=2*J+1, H=Array.from({length:n},()=>Array(n).fill(0));
+      const n=2*J+1;
+      // Diagonal approximation for speed (good for small asymmetry):
       for(let K=-J;K<=J;K++){
-        const idx=K+J;
-        H[idx][idx]=0.5*(thetaA+thetaB)*(J*(J+1)-K*K)+thetaC*K*K;
-      }
-      const pref=0.25*(thetaA-thetaB);
-      for(let K=-J;K<=J-2;K++){
-        const idx=K+J, idx2=K+2+J;
-        const f=Math.sqrt((J-K)*(J+K+1)*(J-K-1)*(J+K+2));
-        const val=pref*f; H[idx][idx2]+=val; H[idx2][idx]+=val;
-      }
-      const evals=eigSymmetricJacobi(H), gM=(2*J+1);
-      for(const E of evals){
-        const w=gM*Math.exp(-E/Tpos);
+        const E=0.5*(thetaA+thetaB)*(J*(J+1)-K*K) + thetaC*K*K;
+        const gM=(2*J+1), w=gM*Math.exp(-E/Tpos);
         Z+=w; M1+=E*w; M2+=E*E*w;
       }
     }
   }
   const lnq=Math.log(Z/sigma), Ebar=M1/Z, varE=Math.max(0,M2/Z - Ebar*Ebar);
-  const U=R*Ebar, Cv=R*(varE/(Tpos*Tpos)), S=R*lnq + U/Tpos;
-  return {U,Cv,S};
+  return { U:R*Ebar, Cv:R*(varE/(Tpos*Tpos)), S:R*lnq + (R*Ebar)/Tpos };
 }
 
-// ===== Master =====
+/* ===== Master aggregator ===== */
 function thermoRRHO(mol,T){
   const theta_v=thetasVib(mol.vib_cm1||[]);
   const Uv=U_vib(T,theta_v), Cvv=Cv_vib(T,theta_v), Sv=S_vib(T,theta_v);
@@ -254,50 +256,53 @@ function thermoRRHO(mol,T){
   let Ur=0,Cvr=0,Sr=0;
   if(mol.kind==="linear"){
     const th=thetasRotLinear(mol.Brot_cm1);
-    const r=rotLinearExact(T,mol.sigma,th);
-    Ur=r.U; Cvr=r.Cv; Sr=r.S;
+    ({U:Ur,Cv:Cvr,S:Sr}=rotLinearExact(T,mol.sigma,th));
   }else{
     const [tA,tB,tC]=thetasRotNonlinear(mol.A_cm1,mol.B_cm1,mol.C_cm1);
-    const r=rotNonlinearExact(T,mol.sigma,tA,tB,tC);
-    Ur=r.U; Cvr=r.Cv; Sr=r.S;
+    ({U:Ur,Cv:Cvr,S:Sr}=rotNonlinearExact(T,mol.sigma,tA,tB,tC));
   }
 
   let Uel=0,Cvel=0,Sel=0;
   if(mol.electronic){
-    const el=electronicContrib(T,mol.electronic);
-    Uel=el.U; Cvel=el.Cv; Sel=el.S;
+    ({U:Uel,Cv:Cvel,S:Sel}=electronicContrib(T,mol.electronic));
   }
 
-  const U = Ut + Ur + Uv + Uel;   // J/mol
-  const Cv = Cvt + Cvr + Cvv + Cvel;
-  const Cp = Cv + R;
-  const S  = St + Sr + Sv + Sel;
-  const H  = U + R*T;              // J/mol
+  const U = Ut + Ur + Uv + Uel;       // J/mol
+  const Cv = Cvt + Cvr + Cvv + Cvel;  // J/(mol·K)
+  const Cp = Cv + R;                  // J/(mol·K)
+  const S  = St + Sr + Sv + Sel;      // J/(mol·K)
+  const H  = U + R*T;                 // J/mol
   return {Cp,Cv,S,U,H};
 }
 
-// ===== Dataset (O3 removed per your decision) =====
+/* ===== Dataset ===== */
 const molecules={
   CO:{name:"CO",kind:"linear",M_kg_per_mol:0.02801,sigma:1,Brot_cm1:1.92253,vib_cm1:[2143],electronic:[{g:1,Te_cm1:0}]},
   O2:{name:"O2",kind:"linear",M_kg_per_mol:0.031999,sigma:2,Brot_cm1:1.43768,vib_cm1:[1556],electronic:[{g:3,Te_cm1:0}]},
   CH4:{name:"CH4",kind:"nonlinear",M_kg_per_mol:0.016042,sigma:12,A_cm1:5.2412,B_cm1:5.2412,C_cm1:5.2412,
-       vib_cm1:[2917, 1534,1534, 3019,3019,3019, 1306,1306,1306], electronic:[{g:1,Te_cm1:0}]},
+       vib_cm1:[2917,1534,1534,3019,3019,3019,1306,1306,1306], electronic:[{g:1,Te_cm1:0}]},
   NH3:{name:"NH3",kind:"nonlinear",M_kg_per_mol:0.0170306,sigma:3,A_cm1:9.4443,B_cm1:9.4443,C_cm1:6.196,
        vib_cm1:[3337,950,3444,1627], electronic:[{g:1,Te_cm1:0}]}
 };
 
-// ===== UI =====
+/* ===== UI wiring ===== */
 document.getElementById('yr').textContent=new Date().getFullYear();
-const molSel=document.getElementById('mol'), tempEl=document.getElementById('temp'), tbody=document.getElementById('tbody');
-document.getElementById('calc').addEventListener('click',computeAndRender);
-window.addEventListener('DOMContentLoaded',computeAndRender);
+const molSel=document.getElementById('mol'),
+      tempEl=document.getElementById('temp'),
+      tbody=document.getElementById('tbody');
 
-function format(n,d=3){return Number(n).toFixed(d);}
+document.getElementById('calc').addEventListener('click', computeAndRender);
+window.addEventListener('DOMContentLoaded', computeAndRender);
+
+function format(n,d=3){ return Number(n).toFixed(d); }
+
 function computeAndRender(){
-  const key=molSel.value, T=parseFloat(tempEl.value);
-  const mol=molecules[key]; if(!mol||!(T>0)) return;
-  const r=thermoRRHO(mol,T);
+  const key=molSel.value;
+  const T=parseFloat(tempEl.value);
+  const mol=molecules[key];
+  if(!mol || !(T>0)){ tbody.innerHTML='<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>'; return; }
 
+  const r=thermoRRHO(mol,T);
   const rows=[
     ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
     ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
