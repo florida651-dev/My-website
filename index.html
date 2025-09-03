@@ -38,7 +38,7 @@
         <label for="mol">Molecule</label>
         <select id="mol">
           <option value="CO">CO</option>
-          <option value="O2">O₂</option>
+          <option value="CH4">CH₄</option>
           <option value="O3">O₃</option>
           <option value="NH3">NH₃</option>
         </select>
@@ -258,7 +258,7 @@ function thermoRRHO(mol,T){
 const molecules={
   CO:{name:"CO",kind:"linear",M_kg_per_mol:0.02801,sigma:1,Brot_cm1:1.92253,vib_cm1:[2143],electronic:[{g:1,Te_cm1:0}]},
   O2:{name:"O2",kind:"linear",M_kg_per_mol:0.031999,sigma:2,Brot_cm1:1.43768,vib_cm1:[1556],electronic:[{g:3,Te_cm1:0}]},
-  O3:{name:"O3",kind:"nonlinear",M_kg_per_mol:0.047997,sigma:2,A_cm1:3.55348,B_cm1:0.44525,C_cm1:0.39479,vib_cm1:[1110,705,1042],electronic:[{g:1,Te_cm1:0}]},
+  CH4:{name:"CH4",kind:"nonlinear",M_kg_per_mol:0.016042,sigma:12,A_cm1:5.2412,B_cm1:5.2412,C_cm1:5.2412,vib_cm1:[2917, 1534,1534, 3019,3019,3019, 1306,1306,1306],electronic:[{g:1,Te_cm1:0}]},
   NH3:{name:"NH3",kind:"nonlinear",M_kg_per_mol:0.0170306,sigma:3,A_cm1:9.4443,B_cm1:9.4443,C_cm1:6.196,vib_cm1:[3337,950,3444,1627],electronic:[{g:1,Te_cm1:0}]}
 };
 
