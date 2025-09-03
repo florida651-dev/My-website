@@ -30,7 +30,7 @@
   </header>
 
   <section class="card">
-    <h2 style="margin-top:0">Thermodynamic Calculations of CO, </h2>
+    <h2 style="margin-top:0">Thermodynamic Calculations of CO, O₂, CH₄, NH₃ </h2>
     <p class="help" style="margin-top:-6px">RRHO approximations. Standard pressure fixed to <b>101 325 Pa</b>.</p>
 
     <div class="grid" style="margin-top:8px">
@@ -276,8 +276,8 @@ function computeAndRender(){
 
   // Display Cp, Cv, S in J/(mol·K); U, H in kJ/mol
   const rows=[
-    ["Cp",format(r.C<sub>P</sub>),"J/(mol·K)"],
-    ["Cv",format(r.C<sub>V</sub>),"J/(mol·K)"],
+    ["Cp",format(r.Cₚ),"J/(mol·K)"],
+    ["Cv",format(r.Cᵥ),"J/(mol·K)"],
     ["S" ,format(r.S ),"J/(mol·K)"],
     ["U" ,format(r.U/1000,3),"kJ/mol"],
     ["H" ,format(r.H/1000,3),"kJ/mol"]
