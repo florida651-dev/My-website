@@ -26,13 +26,13 @@
 </head>
 <body>
   <header>
-    <h1>ThermoCalc</h1>
+    <h1>ThermoCalc Simulations</h1>
     <nav class="help">© <span id="yr"></span> ThermoCalc Simulations</nav>
   </header>
 
   <section class="card">
     <h2 style="margin-top:0">Thermodynamic Calculations</h2>
-    <p class="help" style="margin-top:-6px">RRHO model with low-T rotational sums (linear &amp; non-linear). Standard pressure is fixed to CCCBDB/NIST: <b>101 325 Pa</b>.</p>
+    <p class="help" style="margin-top:-6px">RRHO model. Standard pressure is fixed to <b>101 325 Pa</b>.</p>
 
     <div class="grid" style="margin-top:8px">
       <div class="field">
@@ -49,11 +49,6 @@
       <div class="field">
         <label for="temp">Temperature (K)</label>
         <input id="temp" type="number" step="0.01" min="0.000001" value="298.15" />
-      </div>
-
-      <div class="field">
-        <label>Standard Pressure (Pa)</label>
-        <div class="help">101325 (fixed)</div>
       </div>
 
       <div class="field" style="align-self:end">
@@ -249,9 +244,10 @@ function thermoRRHO(mol, T, opts={}){
 
 // ===== Example dataset =====
 const molecules = {
-  N2:  { name:"N2",  kind:"linear",    M_kg_per_mol:0.0280134, sigma:2, Brot_cm1:1.998,  vib_cm1:[2358.57] },
+  CO:  { name:"CO",  kind:"linear",    M_kg_per_mol:0.02801, sigma:1, Brot_cm1:1.92253,  vib_cm1:[2143] },
   CO2: { name:"CO2", kind:"linear",    M_kg_per_mol:0.0440095, sigma:2, Brot_cm1:0.39021, vib_cm1:[1333.0,667.0,667.0,2349.0] },
   HCl: { name:"HCl", kind:"linear",    M_kg_per_mol:0.0364609, sigma:1, Brot_cm1:10.593, vib_cm1:[2886.0] },
+  O3: { name:"O3", kind:"nonlinear", M_kg_per_mol:0.047997, sigma:2, A_cm1:3.55348, B_cm1:0.44525, C_cm1:0.39479, vib_cm1:[1110,705,1042] },
   H2O: { name:"H2O", kind:"nonlinear", M_kg_per_mol:0.01801528, sigma:2, A_cm1:27.877, B_cm1:14.512, C_cm1:9.285, vib_cm1:[3657,1595,3756] },
 };
 
