@@ -134,42 +134,46 @@
     <p class="kicker">Comparison of ThermoCalc vs. CCCBDB reference values for S° and C<sub>p</sub>. Δ = (ThermoCalc − CCCBDB). Typical agreement is within ~0.1–0.3% for these species under RRHO.</p>
 
     <div style="overflow:auto">
-      <table aria-label="Validation table at 298.15 K">
-        <thead>
-          <tr>
-            <th rowspan="2">Compound</th>
-            <th colspan="3">S° &nbsp;[J·mol⁻¹·K⁻¹]</th>
-            <th colspan="3">C<sub>p</sub> &nbsp;[J·mol⁻¹·K⁻¹]</th>
-          </tr>
-          <tr>
-            <th>ThermoCalc</th><th>CCCBDB</th><th>Δ</th>
-            <th>ThermoCalc</th><th>CCCBDB</th><th>Δ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>CO</td>
-            <td>197.54</td><td>197.66</td><td>−0.12</td>
-            <td>29.13</td><td>29.14</td><td>−0.01</td>
-          </tr>
-          <tr>
-            <td>O₂</td>
-            <td>205.02</td><td>205.15</td><td>−0.13</td>
-            <td>29.36</td><td>29.38</td><td>−0.02</td>
-          </tr>
-          <tr>
-            <td>CH₄</td>
-            <td>186.21</td><td>186.37</td><td>−0.16</td>
-            <td>35.64</td><td>35.69</td><td>−0.05</td>
-          </tr>
-          <tr>
-            <td>NH₃</td>
-            <td>192.98</td><td>192.77</td><td>+0.21</td>
-            <td>35.28</td><td>35.63</td><td>−0.35</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <table aria-label="Validation table at 298.15 K">
+    <thead>
+      <tr>
+        <th rowspan="2">Compound</th>
+        <th colspan="3" class="center">S° [J·mol⁻¹·K⁻¹]</th>
+        <th colspan="3" class="center">C<sub>p</sub> [J·mol⁻¹·K⁻¹]</th>
+      </tr>
+      <tr>
+        <th>ThermoCalc</th><th>CCCBDB</th><th>Δ</th>
+        <th>ThermoCalc</th><th>CCCBDB</th><th>Δ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>CO</td>
+        <td>197.54</td><td>197.66</td><td>−0.12</td>
+        <td>29.13</td><td>29.14</td><td>−0.01</td>
+      </tr>
+      <tr>
+        <td>O₂</td>
+        <td>205.02</td><td>205.15</td><td>−0.13</td>
+        <td>29.36</td><td>29.38</td><td>−0.02</td>
+      </tr>
+      <tr>
+        <td>CH₄</td>
+        <td>186.21</td><td>186.37</td><td>−0.16</td>
+        <td>35.64</td><td>35.69</td><td>−0.05</td>
+      </tr>
+      <tr>
+        <td>NH₃</td>
+        <td>192.98</td><td>192.77</td><td>+0.21</td>
+        <td>35.28</td><td>35.63</td><td>−0.35</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+.center {
+  text-align: center !important;
+}
+
 
     <p class="note">
       Small differences arise from the RRHO model (no explicit anharmonicity or vib-rot coupling). Standard state p° = 101 325 Pa.
