@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Methods & Validation — ThermoCalc Simulations</title>
+<style>
+  :root { --bg:#f7f9fc; --card:#fff; --ink:#0f172a; --muted:#475569; --accent:#2563eb; --line:#e2e8f0; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  header{display:flex;align-items:center;justify-content:space-between;max-width:960px;margin:32px auto 16px;padding:0 16px}
+  header h1{margin:0;font-weight:800;letter-spacing:.2px}
+  .nav a{color:var(--muted);text-decoration:none;margin-left:14px}
+  .nav a:hover{color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 24px rgba(15,23,42,.06);max-width:960px;margin:0 auto 24px;padding:24px}
+  h2{margin:.2rem 0 0.6rem}
+  h3{margin:1.2rem 0 .4rem}
+  p{margin:.5rem 0}
+  code, .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .eq{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;margin:.4rem 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:840px){ .cols{grid-template-columns:1fr} }
+
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right}
+  th:first-child, td:first-child{text-align:left}
+  thead th{background:#f8fafc}
+  tfoot td{font-weight:700}
+  .kicker{color:var(--muted);font-size:14px}
+  .note{color:var(--muted);font-size:14px;margin-top:10px}
+  .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px}
+</style>
+</head>
+<body>
+  <header>
+    <h1>ThermoCalc</h1>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/methods.html"><b>Methods &amp; Validation</b></a>
+      <a href="/purchase.html">Purchase</a>
+    </nav>
+  </header>
+
+  <section class="card">
+    <h2>Methods</h2>
+    <p class="kicker">RRHO ideal-gas model with explicit electronic degeneracy; standard pressure fixed to <b>101 325 Pa</b> unless stated.</p>
+
+    <div class="cols">
+      <div>
+        <h3>Partition functions</h3>
+
+        <div class="eq">
+          <b>Translation (molar):</b><br>
+          <span class="mono">q<sub>trans</sub> = ((2π m k<sub>B</sub>T)/h²)<sup>3/2</sup> · (k<sub>B</sub>T/p)</span>
+        </div>
+
+        <div class="eq">
+          <b>Linear rotation (exact sum):</b><br>
+          <span class="mono">E<sub>J</sub>/k<sub>B</sub> = θ<sub>r</sub> J(J+1), g = (2J+1)</span><br>
+          <span class="mono">q<sub>rot</sub> = (1/σ) · Σ<sub>J=0..∞</sub> g · e<sup>−E<sub>J</sub>/k<sub>B</sub>T</sup></span>
+        </div>
+
+        <div class="eq">
+          <b>Non-linear rotation (exact):</b><br>
+          rigid-rotor Hamiltonian diagonalized for spherical/symmetric/asymmetric tops; result divided by symmetry number σ.
+        </div>
+
+        <div class="eq">
+          <b>Vibration (harmonic, per mode i):</b><br>
+          <span class="mono">q<sub>vib,i</sub> = 1 / (1 − e<sup>−θ<sub>i</sub>/T</sup>)</span>
+        </div>
+
+        <div class="eq">
+          <b>Electronics:</b><br>
+          <span class="mono">q<sub>el</sub> = Σ g<sub>j</sub> e<sup>−Θ<sub>j</sub>/T</sup></span> (Θ<sub>0</sub>=0 for ground state)
+        </div>
+      </div>
+
+      <div>
+        <h3>Thermodynamic relations</h3>
+        <div class="eq">
+          All terms use the same q they’re computed from:<br>
+          <span class="mono">S = R ln q + U/T</span>, &nbsp;
+          <span class="mono">U = R ⟨Ē⟩</span>, &nbsp;
+          <span class="mono">C<sub>v</sub> = R·Var(Ē)/T²</span><br>
+          <span class="mono">C<sub>p</sub> = C<sub>v</sub> + R</span>, &nbsp;
+          <span class="mono">H = U + RT</span>
+        </div>
+        <p class="note">
+          Assumptions: ideal gas; rigid rotor; harmonic oscillator; fundamentals listed with explicit degeneracies; O₂ includes ground-state electronic degeneracy g=3.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Validation <span class="badge">298.15 K</span></h2>
+    <p class="kicker">Comparison of ThermoCalc vs CCCBDB reference values for S° and C<sub>p</sub>. Δ = (ThermoCalc − CCCBDB).</p>
+
+    <div style="overflow:auto">
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2">Compound</th>
+            <th colspan="3">S° &nbsp;[J·mol⁻¹·K⁻¹]</th>
+            <th colspan="3">C<sub>p</sub> &nbsp;[J·mol⁻¹·K⁻¹]</th>
+          </tr>
+          <tr>
+            <th>ThermoCalc</th><th>CCCBDDB</th><th>Δ</th>
+            <th>ThermoCalc</th><th>CCCBDDB</th><th>Δ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CO</td>
+            <td>197.54</td><td>197.66</td><td>-0.12</td>
+            <td>29.13</td><td>29.14</td><td>-0.01</td>
+          </tr>
+          <tr>
+            <td>O₂</td>
+            <td>205.02</td><td>205.15</td><td>-0.13</td>
+            <td>29.36</td><td>29.38</td><td>-0.02</td>
+          </tr>
+          <tr>
+            <td>CH₄</td>
+            <td>186.21</td><td>186.37</td><td>-0.16</td>
+            <td>35.64</td><td>35.69</td><td>-0.05</td>
+          </tr>
+          <tr>
+            <td>NH₃</td>
+            <td>192.98</td><td>192.77</td><td>+0.21</td>
+            <td>35.28</td><td>35.63</td><td>-0.35</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      Small differences arise from the RRHO model (no anharmonicity or vib-rot coupling) and the chosen reference pressure (ThermoCalc uses 1 atm by default; 1 bar would shift S° by ≈0.11 J·mol⁻¹·K⁻¹).
+    </p>
+  </section>
+
+  <section class="card">
+    <p class="kicker">Questions or a molecule you want added? Reach out via the Purchase page or email — we’re happy to validate more species on request.</p>
+  </section>
+</body>
+</html>
