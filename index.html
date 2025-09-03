@@ -272,7 +272,9 @@ function thermoRRHO(mol,T){
   const Cp = Cv + R;                  // J/(mol·K)
   const S  = St + Sr + Sv + Sel;      // J/(mol·K)
   const H  = U + R*T;                 // J/mol
-  return {Cp,Cv,S,U,H};
+  const G = r.H - T*r.S;   // J/mol
+
+  return {Cp,Cv,S,U,H,G};
 }
 
 /* ===== Dataset ===== */
@@ -309,6 +311,8 @@ function computeAndRender(){
     ["S",             format(r.S ), "J/(mol·K)"],
     ["U",             format(r.U/1000,3), "kJ/mol"],
     ["H",             format(r.H/1000,3), "kJ/mol"]
+    ["G", format(G/1000,3), "kJ/mol"]
+
   ];
   tbody.innerHTML=rows.map(([k,v,u])=>`<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`).join("");
 }
