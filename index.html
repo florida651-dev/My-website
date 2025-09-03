@@ -1,99 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ThermoCalc Simulations</title>
-  <style>
-    :root { --max: 980px; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; margin: 0; color: #0f172a; background: #f8fafc; }
-    header { padding: 28px 20px; background: #0ea5e9; color: white; }
-    header h1 { margin: 0 0 6px; font-size: 24px; }
-    header p { margin: 0; opacity: .95; }
-    main { max-width: var(--max); margin: 24px auto; padding: 0 16px 40px; }
-    .card { background: white; border-radius: 14px; box-shadow: 0 6px 20px rgba(2,6,23,.06); padding: 18px; margin-bottom: 18px; }
-    .grid { display: grid; gap: 14px; grid-template-columns: repeat(12, 1fr); align-items: end; }
-    .col-3 { grid-column: span 3; }
-    .col-4 { grid-column: span 4; }
-    .col-6 { grid-column: span 6; }
-    .col-12 { grid-column: span 12; }
-    label { display:block; font-size: 13px; color:#334155; margin-bottom: 6px; }
-    input, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; font-size: 14px; }
-    button { padding: 10px 14px; border-radius: 10px; border: 0; background: #0ea5e9; color: white; font-weight: 600; cursor: pointer; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-    th { background: #f1f5f9; font-weight: 600; }
-    .muted { color:#475569; font-size: 13px; }
-    .tag { display:inline-block; padding: 2px 8px; border-radius: 999px; background:#f1f5f9; font-size:12px; color:#334155; margin-left:8px; }
-    footer { max-width: var(--max); margin: 20px auto 60px; padding: 0 16px; color:#64748b; font-size:13px; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>ThermoCalc Simulations</h1>
-    <p>Partition-function based thermodynamic properties at 1 bar
-  <main>
-    <section class="card">
-      <div class="grid">
-        <div class="col-6">
-          <label for="molecule">Molecule</label>
-          <select id="molecule"></select>
-        </div>
-        <div class="col-3">
-          <label for="temp">Temperature (K)</label>
-          <input id="temp" type="number" step="0.01" value="298.15" />
-        </div>
-        <div class="col-3">
-          <label>&nbsp;</label>
-          <button id="calc">Calculate</button>
-        </div>
-        <div class="col-12 muted">Assumptions: ideal gas, rigid rotor, harmonic oscillator; electronic degeneracy via <code>g<sub>el</sub></code>. Standard pressure <code>p° = 1.00000×10<sup>5</sup> Pa</code>.</div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h3 style="margin-top:2px">Results</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Quantity</th>
-            <th>Value</th>
-            <th>Units</th>
-          </tr>
-        </thead>
-        <tbody id="results"></tbody>
-      </table>
-    </section>
-  </main>
-
-  <footer>
-    <div>© <span id="year"></span> ThermoCalc Simulations. For education & quick checks; compare against NIST/ATcT for critical work.</div>
-  </footer>
-
-  <script>
-    // thermocalc.ts
-// Ideal-gas, RRHO, per-mole properties for linear & nonlinear molecules.
-// Outputs (in order): Cp, Cv, S, U, H   [SI molar units]
+// thermocalc.ts
+// RRHO thermodynamics with low-T-safe rotational sums (linear & non-linear).
+// Outputs in order: Cp, Cv, S, U, H (molar SI units).
 
 // ---------- Physical constants (SI) ----------
-const R  = 8.31446261815324;          // J/(mol·K)
-const kB = 1.380649e-23;              // J/K
-const h  = 6.62607015e-34;            // J·s
-const c  = 299792458;                 // m/s
-const NA = 6.02214076e23;             // 1/mol
+export const R  = 8.31446261815324;   // J/(mol·K)
+export const kB = 1.380649e-23;       // J/K
+export const h  = 6.62607015e-34;     // J·s
+export const c  = 299792458;          // m/s
+export const NA = 6.02214076e23;      // 1/mol
 const PI = Math.PI;
 
 // ---------- Types ----------
-type LinearMolecule = {
+export type LinearMolecule = {
   name: string;
   kind: "linear";
   M_kg_per_mol: number;       // molar mass [kg/mol]
   sigma: number;              // symmetry number
   Brot_cm1: number;           // rotational constant B [cm^-1]
-  vib_cm1: number[];          // fundamental vibrational wavenumbers [cm^-1] (no degeneracy expansion; list them explicitly)
+  vib_cm1: number[];          // fundamental vibrational wavenumbers [cm^-1] (repeat entries for degeneracy)
 };
 
-type NonlinearMolecule = {
+export type NonlinearMolecule = {
   name: string;
   kind: "nonlinear";
   M_kg_per_mol: number;
@@ -104,367 +31,8 @@ type NonlinearMolecule = {
   vib_cm1: number[];
 };
 
-type Molecule = LinearMolecule | NonlinearMolecule;
+export type Molecule = LinearMolecule | NonlinearMolecule;
 
-// ---------- Helpers: characteristic temperatures ----------
-function thetaFromCm1(cm1: number): number {
-  // θ = h c ν / kB, with ν in cm^-1 -> convert to m^-1 by ×100
-  return (h * c * cm1 * 100) / kB; // [K]
-}
-
-function thetasVib(cm1: number[]): number[] {
-  return cm1.map(thetaFromCm1);
-}
-
-function thetasRotLinear(B_cm1: number): number {
-  return thetaFromCm1(B_cm1);
-}
-
-function thetasRotNonlinear(A_cm1: number, B_cm1: number, C_cm1: number): [number, number, number] {
-  return [thetaFromCm1(A_cm1), thetaFromCm1(B_cm1), thetaFromCm1(C_cm1)];
-}
-
-// ---------- Vibrational contributions (RRHO, no ZPE) ----------
-function U_vib(T: number, theta_v: number[]): number {
-  // U_vib = R * Σ θ/(exp(θ/T)-1)
-  let sum = 0;
-  for (const th of theta_v) {
-    const x = th / T;
-    const ex = Math.exp(x);
-    sum += th / (ex - 1);
-  }
-  return R * sum;
-}
-
-function Cv_vib(T: number, theta_v: number[]): number {
-  // Cv_vib = R * Σ ( (θ/T)^2 * exp(θ/T) / (exp(θ/T)-1)^2 )
-  let sum = 0;
-  for (const th of theta_v) {
-    const x = th / T;
-    const ex = Math.exp(x);
-    sum += (x * x) * (ex / ((ex - 1) * (ex - 1)));
-  }
-  return R * sum;
-}
-
-function S_vib(T: number, theta_v: number[]): number {
-  // S_vib = R * Σ [ θ/T * 1/(exp(θ/T)-1) - ln(1 - exp(-θ/T)) ]
-  let sum = 0;
-  for (const th of theta_v) {
-    const x = th / T;
-    const ex = Math.exp(x);
-    sum += (x / (ex - 1)) - Math.log(1 - Math.exp(-x));
-  }
-  return R * sum;
-}
-
-// -------- Exact linear-rotor rotational functions (low-T safe) --------
-function rotLinearExact(
-  T: number,
-  sigma: number,
-  theta_r: number,
-  relTol = 1e-12,
-  maxJ = 10000
-): { lnq: number; U: number; Cv: number; S: number } {
-  // x = θ_r / T (dimensionless)
-  const x = theta_r / T;
-
-  // Accumulate Z = Σ (2J+1) e^{-x J(J+1)}  and moments for <J(J+1)>
-  let Z = 0;
-  let M1 = 0; // Σ (2J+1) J(J+1) e^{-x ...}
-  let J = 0;
-
-  // adaptive summation until terms are negligible
-  while (J <= maxJ) {
-    const JJ1 = J * (J + 1);
-    const w = (2 * J + 1) * Math.exp(-x * JJ1);
-    if (w < relTol * (Z || 1)) {
-      // stop when increment is tiny relative to running sum (after at least a few terms)
-      if (J > 5) break;
-    }
-    Z += w;
-    M1 += w * JJ1;
-    J++;
-  }
-
-  // include symmetry number
-  const q = Z / sigma;
-  const lnq = Math.log(q);
-
-  // <J(J+1)>
-  const JJ1_avg = M1 / Z;
-
-  // U_rot (molar): R * θ_r * <J(J+1)>
-  const U = R * theta_r * JJ1_avg; // J/mol
-
-  // Cv_rot via central difference on U(T)
-  const dT = Math.max(1e-6, 1e-4 * T); // small relative step
-  const U_plus = (() => {
-    const x2 = theta_r / (T + dT);
-    let Z2 = 0, M12 = 0;
-    for (let j = 0; j <= J + 20; j++) {
-      const JJ1 = j * (j + 1);
-      const w = (2 * j + 1) * Math.exp(-x2 * JJ1);
-      Z2 += w;
-      M12 += w * JJ1;
-      if (w < relTol * (Z2 || 1) && j > 5) break;
-    }
-    return R * theta_r * (M12 / Z2);
-  })();
-
-  const U_minus = (() => {
-    const Tp = Math.max(1e-6, T - dT); // keep positive
-    const x1 = theta_r / Tp;
-    let Z1 = 0, M11 = 0;
-    for (let j = 0; j <= J + 20; j++) {
-      const JJ1 = j * (j + 1);
-      const w = (2 * j + 1) * Math.exp(-x1 * JJ1);
-      Z1 += w;
-      M11 += w * JJ1;
-      if (w < relTol * (Z1 || 1) && j > 5) break;
-    }
-    return R * theta_r * (M11 / Z1);
-  })();
-
-  const Cv = (U_plus - U_minus) / (2 * dT); // J/(mol·K)
-
-  // Entropy (molar): S = R ln q + U/T
-  const S = R * lnq + U / T; // J/(mol·K)
-
-  return { lnq, U, Cv, S };
-}
-
-// ===== Exact non-linear (rigid) rotor: U_rot, Cv_rot, S_rot, ln q_rot (low-T safe) =====
-// Expects rotational constants as characteristic temperatures θA, θB, θC in K
-// Uses: R (J/mol/K) already defined in your module
-
-function rotNonlinearExact(
-  T: number,
-  sigma: number,
-  thetaA: number,
-  thetaB: number,
-  thetaC: number,
-  opts?: { relTol?: number; JmaxCap?: number; nearlyTol?: number }
-): { lnq: number; U: number; Cv: number; S: number } {
-  const relTol = opts?.relTol ?? 1e-12;
-  const JmaxCap = opts?.JmaxCap ?? 120;       // cap for safety; low-T converges long before this
-  const nearlyTol = opts?.nearlyTol ?? 1e-8;  // "almost equal" threshold for rotor type checks
-
-  // Helper: detect rotor type
-  const isClose = (a: number, b: number) => Math.abs(a - b) <= nearlyTol * Math.max(1, Math.abs(a), Math.abs(b));
-  const spherical = isClose(thetaA, thetaB) && isClose(thetaB, thetaC);
-  const prolateSym  = isClose(thetaB, thetaC) && !spherical; // A != B=C
-  const oblateSym   = isClose(thetaA, thetaB) && !spherical; // C != A=B
-
-  // Accumulators in "Kelvin units" (Ẽ := E/kB in K)
-  let Z = 0;     // Σ g_i e^{-Ẽ/T}
-  let M1 = 0;    // Σ Ẽ g_i e^{-Ẽ/T}
-  let M2 = 0;    // Σ Ẽ^2 g_i e^{-Ẽ/T}
-
-  // Spherical top fast path (θA=θB=θC≡θ)
-  if (spherical) {
-    const theta = (thetaA + thetaB + thetaC) / 3;
-    for (let J = 0; J <= JmaxCap; J++) {
-      const Etil = theta * J * (J + 1);
-      const gK = (2 * J + 1);     // K-degeneracy
-      const gM = (2 * J + 1);     // space degeneracy (M)
-      const g = gK * gM;
-      const w = g * Math.exp(-Etil / T);
-      Z  += w;
-      M1 += Etil * w;
-      M2 += Etil * Etil * w;
-      if (w < relTol * Z && J > 3) break;
-    }
-    const q = Z / sigma;
-    const lnq = Math.log(q);
-    const Ebar = M1 / Z;                        // ⟨Ẽ⟩ in K
-    const varE = M2 / Z - Ebar * Ebar;          // Var(Ẽ)
-    const U = R * Ebar;                         // J/mol
-    const Cv = R * (varE / (T * T));            // J/(mol·K)
-    const S = R * lnq + U / T;                  // J/(mol·K)
-    return { lnq, U, Cv, S };
-  }
-
-  // Symmetric top fast paths (exact E_{J,K})
-  if (prolateSym || oblateSym) {
-    // Use "B" as the doubly-equal constant; delta term picks the single-distinct axis
-    if (prolateSym) {
-      // A != B = C : prolate  => Ẽ = B*J(J+1) + (A-B) K^2
-      const B = thetaB; const A = thetaA; const delta = A - B;
-      for (let J = 0; J <= JmaxCap; J++) {
-        const base = B * J * (J + 1);
-        for (let K = -J; K <= J; K++) {
-          const Etil = base + delta * K * K;
-          const gM = (2 * J + 1);               // space degeneracy
-          const w = gM * Math.exp(-Etil / T);
-          Z  += w;
-          M1 += Etil * w;
-          M2 += Etil * Etil * w;
-        }
-        const inc = gShellInc(Z, M1, J);
-        if (inc < relTol && J > 2) break;
-      }
-    } else {
-      // oblate: C != A = B  => Ẽ = B*J(J+1) + (C-B) K^2
-      const B = thetaA; const C = thetaC; const delta = C - B; // here A=B≈thetaA
-      for (let J = 0; J <= JmaxCap; J++) {
-        const base = B * J * (J + 1);
-        for (let K = -J; K <= J; K++) {
-          const Etil = base + delta * K * K;
-          const gM = (2 * J + 1);
-          const w = gM * Math.exp(-Etil / T);
-          Z  += w;
-          M1 += Etil * w;
-          M2 += Etil * Etil * w;
-        }
-        const inc = gShellInc(Z, M1, J);
-        if (inc < relTol && J > 2) break;
-      }
-    }
-    const q = Z / sigma;
-    const lnq = Math.log(q);
-    const Ebar = M1 / Z;
-    const varE = M2 / Z - Ebar * Ebar;
-    const U = R * Ebar;
-    const Cv = R * (varE / (T * T));
-    const S = R * lnq + U / T;
-    return { lnq, U, Cv, S };
-  }
-
-  // General asymmetric top: build (2J+1)x(2J+1) matrix in |J,K> with ΔK=±2 couplings
-  for (let J = 0; J <= JmaxCap; J++) {
-    const n = 2 * J + 1;
-    if (n <= 0) continue;
-
-    // Build symmetric matrix H(K,K') in Kelvin units (Ẽ := E/kB)
-    // K index mapping: idx(K) = K + J (so K=-J..J -> 0..2J)
-    const H = Array.from({ length: n }, () => new Array(n).fill(0));
-
-    // Diagonal terms: (A+B)/2 * [J(J+1) - K^2] + C * K^2
-    for (let K = -J; K <= J; K++) {
-      const idx = K + J;
-      const diag = 0.5 * (thetaA + thetaB) * (J * (J + 1) - K * K) + thetaC * K * K;
-      H[idx][idx] = diag;
-    }
-
-    // Off-diagonal ΔK = ±2: (A - B)/4 * √[(J∓K)(J±K+1)(J∓K-1)(J±K+2)]
-    const pref = 0.25 * (thetaA - thetaB);
-    for (let K = -J; K <= J - 2; K++) {
-      const idx = K + J;
-      const idx2 = (K + 2) + J;
-      const f = Math.sqrt((J - K) * (J + K + 1) * (J - K - 1) * (J + K + 2));
-      const val = pref * f;
-      H[idx][idx2] += val;
-      H[idx2][idx] += val;
-    }
-
-    // Eigenvalues of H (real-symmetric) — use Jacobi for robustness
-    const evals = eigSymmetricJacobi(H);
-
-    // For each eigenvalue, include (2J+1) space degeneracy
-    const gM = (2 * J + 1);
-    let ZJ = 0, M1J = 0, M2J = 0;
-    for (const Etil of evals) {
-      const w = gM * Math.exp(-Etil / T);
-      Z  += w;      ZJ  += w;
-      M1 += Etil * w; M1J += Etil * w;
-      M2 += Etil * Etil * w; M2J += Etil * Etil * w;
-    }
-
-    // Convergence check: if this J-shell is tiny relative to total, we can stop
-    if (ZJ < relTol * Z && J > 2) break;
-  }
-
-  // Final thermodynamics
-  const q = Z / sigma;
-  const lnq = Math.log(q);
-  const Ebar = M1 / Z;
-  const varE = M2 / Z - Ebar * Ebar;
-  const U = R * Ebar;
-  const Cv = R * (varE / (T * T));
-  const S = R * lnq + U / T;
-  return { lnq, U, Cv, S };
-
-  // --- helpers ---
-  function gShellInc(Zacc: number, M1acc: number, J: number): number {
-    // crude relative increment metric (used in symmetric-top loops)
-    // not critical; just helps early stop when shell contribution is tiny
-    const scale = Math.max(1, Math.abs(Zacc), Math.abs(M1acc));
-    return Math.min(Math.abs((2 * J + 1) / scale), 1); // safe small number
-  }
-}
-
-// Real-symmetric eigenvalues via Jacobi rotations (compact, robust for n<=~201)
-function eigSymmetricJacobi(Ain: number[][], tol = 1e-12, maxIter?: number): number[] {
-  const n = Ain.length;
-  const A = Ain.map(row => row.slice()); // copy
-  const iters = maxIter ?? 5 * n * n;
-
-  function offDiagMax() {
-    let p = 0, q = 1, max = 0;
-    for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        const v = Math.abs(A[i][j]);
-        if (v > max) { max = v; p = i; q = j; }
-      }
-    }
-    return { p, q, max };
-  }
-
-  for (let it = 0; it < iters; it++) {
-    const { p, q, max } = offDiagMax();
-    if (max < tol) break;
-
-    const app = A[p][p], aqq = A[q][q], apq = A[p][q];
-    const phi = 0.5 * Math.atan2(2 * apq, (aqq - app));
-    const c = Math.cos(phi), s = Math.sin(phi);
-
-    // rotate rows/cols p and q
-    for (let k = 0; k < n; k++) {
-      const aip = A[k][p], aiq = A[k][q];
-      A[k][p] = c * aip - s * aiq;
-      A[k][q] = s * aip + c * aiq;
-    }
-    for (let k = 0; k < n; k++) {
-      const apk = A[p][k], aqk = A[q][k];
-      A[p][k] = c * apk - s * aqk;
-      A[q][k] = s * apk + c * aqk;
-    }
-    // enforce symmetry
-    A[p][q] = A[q][p] = 0;
-  }
-
-  // diagonal now ~ eigenvalues
-  const evals = new Array(n);
-  for (let i = 0; i < n; i++) evals[i] = A[i][i];
-  evals.sort((a, b) => a - b); // low to high
-  return evals;
-}
-
-    
-
-// ---------- Translational (ideal gas, molar form) ----------
-function U_trans(T: number): number {
-  // 3/2 RT
-  return 1.5 * R * T;
-}
-function Cv_trans(): number {
-  return 1.5 * R;
-}
-function S_trans(T: number, p_Pa: number, M_kg_per_mol: number): number {
-  // Sackur–Tetrode (molar):  S = R [ ln( (2π m kT / h^2)^{3/2} * (kT / p) * NA ) + 5/2 ]
-  // careful: m here is single-molecule mass = M/NA
-  const m = M_kg_per_mol / NA; // kg
-  const factor = Math.pow((2 * PI * m * kB * T) / (h * h), 1.5) * (kB * T / p_Pa) * NA;
-  return R * (Math.log(factor) + 2.5);
-}
-
-// ---------- Electronic (ground state only) ----------
-function U_el(): number { return 0; }
-function Cv_el(): number { return 0; }
-function S_el(): number { return 0; }
-
-// ---------- Master computation ----------
 export type ThermoResult = {
   Cp: number;  // J/(mol·K)
   Cv: number;  // J/(mol·K)
@@ -476,57 +44,345 @@ export type ThermoResult = {
     rot:   { U: number; Cv: number; S: number; Cp: number };
     vib:   { U: number; Cv: number; S: number; Cp: number };
   };
+  meta: {
+    highestJ_linear?: number;
+    highestJ_nonlinear?: number;
+    lnq_rot?: number;
+  };
 };
 
-export function thermoRRHO(mol: Molecule, T: number, p_Pa: number = 1.01325e5): ThermoResult {
+export type ThermoOptions = {
+  p_Pa?: number;                // default 1.01325e5
+  includeZPEinU?: boolean;      // default false (add 0.5 R Σθ_v if true)
+  rotRelTol?: number;           // default 1e-12 (J-shell relative cutoff)
+  rotJmaxCapLinear?: number;    // default 200
+  rotJmaxCapNonlin?: number;    // default 120
+  nearlyTol?: number;           // default 1e-8 (A≈B≈C detection)
+};
+
+// ---------- Helpers: characteristic temperatures ----------
+export function thetaFromCm1(cm1: number): number {
+  // θ = h c ν / kB, with ν in cm^-1 -> convert to m^-1 by ×100
+  return (h * c * cm1 * 100) / kB; // [K]
+}
+export function thetasVib(cm1: number[]): number[] {
+  return cm1.map(thetaFromCm1);
+}
+export function thetasRotLinear(B_cm1: number): number {
+  return thetaFromCm1(B_cm1);
+}
+export function thetasRotNonlinear(A_cm1: number, B_cm1: number, C_cm1: number): [number, number, number] {
+  return [thetaFromCm1(A_cm1), thetaFromCm1(B_cm1), thetaFromCm1(C_cm1)];
+}
+
+// ---------- Vibrational contributions (RRHO, no ZPE in U by default) ----------
+function U_vib(T: number, theta_v: number[], includeZPE: boolean): number {
+  // U_vib = R * Σ [ θ/(exp(θ/T)-1) + (includeZPE ? 0.5*θ : 0) ]
+  let sum = 0;
+  for (const th of theta_v) {
+    const x = th / Math.max(T, 1e-12);
+    const ex = Math.exp(x);
+    sum += th / (ex - 1) + (includeZPE ? 0.5 * th : 0);
+  }
+  return R * sum;
+}
+function Cv_vib(T: number, theta_v: number[]): number {
+  // Cv_vib = R * Σ [ (θ/T)^2 * exp(θ/T) / (exp(θ/T)-1)^2 ]
+  let sum = 0;
+  for (const th of theta_v) {
+    const x = th / Math.max(T, 1e-12);
+    const ex = Math.exp(x);
+    const denom = ex - 1;
+    sum += (x * x) * (ex / (denom * denom));
+  }
+  return R * sum;
+}
+function S_vib(T: number, theta_v: number[]): number {
+  // S_vib = R * Σ [ θ/T * 1/(exp(θ/T)-1) - ln(1 - exp(-θ/T)) ]
+  let sum = 0;
+  for (const th of theta_v) {
+    const x = th / Math.max(T, 1e-12);
+    const ex = Math.exp(x);
+    sum += (x / (ex - 1)) - Math.log(1 - Math.exp(-x));
+  }
+  return R * sum;
+}
+
+// ---------- Translational (ideal gas, molar) ----------
+function U_trans(T: number): number { return 1.5 * R * T; }
+function Cv_trans(): number { return 1.5 * R; }
+function S_trans(T: number, p_Pa: number, M_kg_per_mol: number): number {
+  // Sackur–Tetrode (molar):  S = R [ ln( (2π m kT / h^2)^{3/2} * (kT / p) * NA ) + 5/2 ]
+  const m = M_kg_per_mol / NA; // single-molecule mass
+  const factor = Math.pow((2 * PI * m * kB * T) / (h * h), 1.5) * (kB * T / p_Pa) * NA;
+  return R * (Math.log(factor) + 2.5);
+}
+
+// ---------- Electronic (ground state only) ----------
+function U_el(): number { return 0; }
+function Cv_el(): number { return 0; }
+function S_el(): number { return 0; }
+
+// ============================================================================
+// ROTATIONAL: LOW-T-SAFE EXACT SUMS
+// ============================================================================
+
+// -------- Exact linear-rotor rotational functions --------
+function rotLinearExact(
+  T: number,
+  sigma: number,
+  theta_r: number,
+  relTol: number,
+  JmaxCap: number
+): { lnq: number; U: number; Cv: number; S: number; highestJ: number } {
+  const Tpos = Math.max(T, 1e-12);
+  const x = theta_r / Tpos;
+
+  let Z = 0;     // Σ g e^{-Ẽ/T}   with Ẽ=θ_r J(J+1)
+  let M1 = 0;    // Σ Ẽ g e^{-Ẽ/T}
+  let M2 = 0;    // Σ Ẽ^2 g e^{-Ẽ/T}
+  let highestJ = 0;
+
+  for (let J = 0; J <= JmaxCap; J++) {
+    const JJ1 = J * (J + 1);
+    const g = (2 * J + 1);
+    const Etil = theta_r * JJ1;
+    const w = g * Math.exp(-Etil / Tpos);
+
+    Z  += w;
+    M1 += Etil * w;
+    M2 += Etil * Etil * w;
+
+    highestJ = J;
+
+    if (w < relTol * Math.max(Z, 1) && J > 5) break;
+  }
+
+  const q = Z / sigma;
+  const lnq = Math.log(q);
+  const Ebar = M1 / Z;                     // in K
+  const varE = Math.max(0, M2 / Z - Ebar * Ebar);
+
+  const U = R * Ebar;                      // J/mol
+  const Cv = R * (varE / (Tpos * Tpos));   // J/(mol·K)
+  const S = R * lnq + U / Tpos;            // J/(mol·K)
+
+  return { lnq, U, Cv, S, highestJ };
+}
+
+// -------- Exact non-linear rotor (spherical / symmetric / asymmetric) --------
+function rotNonlinearExact(
+  T: number,
+  sigma: number,
+  thetaA: number,
+  thetaB: number,
+  thetaC: number,
+  relTol: number,
+  JmaxCap: number,
+  nearlyTol: number
+): { lnq: number; U: number; Cv: number; S: number; highestJ: number } {
+  const Tpos = Math.max(T, 1e-12);
+  const isClose = (a: number, b: number) =>
+    Math.abs(a - b) <= nearlyTol * Math.max(1, Math.abs(a), Math.abs(b));
+
+  const spherical = isClose(thetaA, thetaB) && isClose(thetaB, thetaC);
+  const prolateSym  = isClose(thetaB, thetaC) && !spherical; // A != B=C
+  const oblateSym   = isClose(thetaA, thetaB) && !spherical; // C != A=B
+
+  let Z = 0, M1 = 0, M2 = 0;
+  let highestJ = 0;
+
+  if (spherical) {
+    const theta = (thetaA + thetaB + thetaC) / 3;
+    for (let J = 0; J <= JmaxCap; J++) {
+      const Etil = theta * J * (J + 1);
+      const gK = (2 * J + 1);
+      const gM = (2 * J + 1);
+      const g = gK * gM;
+      const w = g * Math.exp(-Etil / Tpos);
+      Z  += w; M1 += Etil * w; M2 += Etil * Etil * w;
+      highestJ = J;
+      if (w < relTol * Math.max(Z, 1) && J > 3) break;
+    }
+    const q = Z / sigma;
+    const lnq = Math.log(q);
+    const Ebar = M1 / Z;
+    const varE = Math.max(0, M2 / Z - Ebar * Ebar);
+    const U = R * Ebar;
+    const Cv = R * (varE / (Tpos * Tpos));
+    const S = R * lnq + U / Tpos;
+    return { lnq, U, Cv, S, highestJ };
+  }
+
+  if (prolateSym || oblateSym) {
+    if (prolateSym) {
+      // A != B = C : Ẽ = B*J(J+1) + (A-B) K^2
+      const B = thetaB, A = thetaA, delta = A - B;
+      for (let J = 0; J <= JmaxCap; J++) {
+        const base = B * J * (J + 1);
+        let ZJ = 0;
+        for (let K = -J; K <= J; K++) {
+          const Etil = base + delta * K * K;
+          const gM = (2 * J + 1);
+          const w = gM * Math.exp(-Etil / Tpos);
+          Z  += w; M1 += Etil * w; M2 += Etil * Etil * w; ZJ += w;
+        }
+        highestJ = J;
+        if (ZJ < relTol * Math.max(Z, 1) && J > 2) break;
+      }
+    } else {
+      // oblate: C != A = B : Ẽ = B*J(J+1) + (C-B) K^2 (here A=B≈thetaA)
+      const B = thetaA, C = thetaC, delta = C - B;
+      for (let J = 0; J <= JmaxCap; J++) {
+        const base = B * J * (J + 1);
+        let ZJ = 0;
+        for (let K = -J; K <= J; K++) {
+          const Etil = base + delta * K * K;
+          const gM = (2 * J + 1);
+          const w = gM * Math.exp(-Etil / Tpos);
+          Z  += w; M1 += Etil * w; M2 += Etil * Etil * w; ZJ += w;
+        }
+        highestJ = J;
+        if (ZJ < relTol * Math.max(Z, 1) && J > 2) break;
+      }
+    }
+    const q = Z / sigma;
+    const lnq = Math.log(q);
+    const Ebar = M1 / Z;
+    const varE = Math.max(0, M2 / Z - Ebar * Ebar);
+    const U = R * Ebar;
+    const Cv = R * (varE / (Tpos * Tpos));
+    const S = R * lnq + U / Tpos;
+    return { lnq, U, Cv, S, highestJ };
+  }
+
+  // Asymmetric top: build (2J+1)x(2J+1) H in Kelvin units and diagonalize
+  for (let J = 0; J <= JmaxCap; J++) {
+    const n = 2 * J + 1;
+    if (n <= 0) continue;
+
+    // Matrix H(K,K') with ΔK = 0, ±2 couplings
+    const H = Array.from({ length: n }, () => new Array(n).fill(0));
+    // Diagonal: (A+B)/2 * [J(J+1) - K^2] + C K^2
+    for (let K = -J; K <= J; K++) {
+      const idx = K + J;
+      H[idx][idx] = 0.5 * (thetaA + thetaB) * (J * (J + 1) - K * K) + thetaC * K * K;
+    }
+    // Off-diagonal ΔK = ±2: (A - B)/4 * sqrt[(J∓K)(J±K+1)(J∓K-1)(J±K+2)]
+    const pref = 0.25 * (thetaA - thetaB);
+    for (let K = -J; K <= J - 2; K++) {
+      const idx = K + J;
+      const idx2 = (K + 2) + J;
+      const f = Math.sqrt((J - K) * (J + K + 1) * (J - K - 1) * (J + K + 2));
+      const val = pref * f;
+      H[idx][idx2] += val;
+      H[idx2][idx] += val;
+    }
+
+    const evals = eigSymmetricJacobi(H); // eigenvalues in Kelvin units
+    const gM = (2 * J + 1);
+
+    let ZJ = 0;
+    for (const Etil of evals) {
+      const w = gM * Math.exp(-Etil / Tpos);
+      Z  += w; M1 += Etil * w; M2 += Etil * Etil * w; ZJ += w;
+    }
+    highestJ = J;
+    if (ZJ < relTol * Math.max(Z, 1) && J > 2) break;
+  }
+
+  const q = Z / sigma;
+  const lnq = Math.log(q);
+  const Ebar = M1 / Z;
+  const varE = Math.max(0, M2 / Z - Ebar * Ebar);
+  const U = R * Ebar;
+  const Cv = R * (varE / (Tpos * Tpos));
+  const S = R * lnq + U / Tpos;
+  return { lnq, U, Cv, S, highestJ };
+}
+
+// Real-symmetric eigenvalues via Jacobi rotations (robust for modest n)
+function eigSymmetricJacobi(Ain: number[][], tol = 1e-12, maxIter?: number): number[] {
+  const n = Ain.length;
+  const A = Ain.map(row => row.slice());
+  const iters = maxIter ?? 5 * n * n;
+
+  function offDiagMax() {
+    let p = 0, q = 1, max = 0;
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+      const v = Math.abs(A[i][j]);
+      if (v > max) { max = v; p = i; q = j; }
+    }
+    return { p, q, max };
+  }
+
+  for (let it = 0; it < iters; it++) {
+    const { p, q, max } = offDiagMax();
+    if (max < tol) break;
+    const app = A[p][p], aqq = A[q][q], apq = A[p][q];
+    const phi = 0.5 * Math.atan2(2 * apq, (aqq - app));
+    const c = Math.cos(phi), s = Math.sin(phi);
+
+    for (let k = 0; k < n; k++) {
+      const aip = A[k][p], aiq = A[k][q];
+      A[k][p] = c * aip - s * aiq;
+      A[k][q] = s * aip + c * aiq;
+    }
+    for (let k = 0; k < n; k++) {
+      const apk = A[p][k], aqk = A[q][k];
+      A[p][k] = c * apk - s * aqk;
+      A[q][k] = s * apk + c * aqk;
+    }
+    A[p][q] = A[q][p] = 0;
+  }
+
+  const evals = new Array(n);
+  for (let i = 0; i < n; i++) evals[i] = A[i][i];
+  evals.sort((a, b) => a - b);
+  return evals;
+}
+
+// ============================================================================
+// MASTER: assemble Cp, Cv, S, U, H
+// ============================================================================
+export function thermoRRHO(mol: Molecule, T: number, opts: ThermoOptions = {}): ThermoResult {
+  const p = opts.p_Pa ?? 1.01325e5;
+  const includeZPE = !!opts.includeZPEinU;
+  const relTol = opts.rotRelTol ?? 1e-12;
+  const JcapLin = opts.rotJmaxCapLinear ?? 200;
+  const JcapNon = opts.rotJmaxCapNonlin ?? 120;
+  const nearlyTol = opts.nearlyTol ?? 1e-8;
+
   // Vibrations:
   const theta_v = thetasVib(mol.vib_cm1);
-  const Uv = U_vib(T, theta_v);
+  const Uv  = U_vib(T, theta_v, includeZPE);
   const Cvv = Cv_vib(T, theta_v);
-  const Sv = S_vib(T, theta_v);
+  const Sv  = S_vib(T, theta_v);
 
-  // Translation (molar):
+  // Translation:
   const Ut = U_trans(T);
   const Cvt = Cv_trans();
-  const St = S_trans(T, p_Pa, mol.M_kg_per_mol);
+  const St = S_trans(T, p, mol.M_kg_per_mol);
 
-  // Inside thermoRRHO(...):
-if (mol.kind === "linear") {
-  const theta_r = thetasRotLinear(mol.Brot_cm1);
+  // Rotation (low-T-safe exact sums):
+  let Ur = 0, Cvr = 0, Sr = 0, lnq_rot = 0, Jused: number | undefined;
 
-  // --- NEW: exact low-T safe rotational properties ---
-  const rot = rotLinearExact(T, mol.sigma, theta_r);
-
-  const Ur = rot.U;
-  const Cvr = rot.Cv;
-  const Sr  = rot.S;
-
-  // ...and keep the rest of your totals logic the same
-  // U = Ut + Ur + Uv;  Cv = Cvt + Cvr + Cvv;  S = St + Sr + Sv;  Cp = Cv + R;  H = U + RT
-}
-
-  // --- inside thermoRRHO(...), nonlinear branch ---
-} else {
-  const [tA, tB, tC] = thetasRotNonlinear(mol.A_cm1, mol.B_cm1, mol.C_cm1);
-
-  // NEW: exact low-T safe rotational properties for non-linear rotor
-  const rot = rotNonlinearExact(T, mol.sigma, tA, tB, tC);
-
-  const Ur = rot.U;
-  const Cvr = rot.Cv;
-  const Sr  = rot.S;
-
-  // ...rest of your totals unchanged:
-  // U = Ut + Ur + Uv;  Cv = Cvt + Cvr + Cvv;  Cp = Cv + R;  S = St + Sr + Sv;  H = U + R*T;
-}
-
+  if (mol.kind === "linear") {
+    const theta_r = thetasRotLinear(mol.Brot_cm1);
+    const rot = rotLinearExact(T, mol.sigma, theta_r, relTol, JcapLin);
+    Ur = rot.U; Cvr = rot.Cv; Sr = rot.S; lnq_rot = rot.lnq; Jused = rot.highestJ;
+  } else {
+    const [tA, tB, tC] = thetasRotNonlinear(mol.A_cm1, mol.B_cm1, mol.C_cm1);
+    const rot = rotNonlinearExact(T, mol.sigma, tA, tB, tC, relTol, JcapNon, nearlyTol);
+    Ur = rot.U; Cvr = rot.Cv; Sr = rot.S; lnq_rot = rot.lnq; Jused = rot.highestJ;
+  }
 
   // Totals:
-  const U = Ut + Ur + Uv + U_el();            // J/mol
-  const Cv = Cvt + Cvr + Cvv + Cv_el();       // J/(mol·K)
-  const Cp = Cv + R;                           // ideal-gas relation Cp = Cv + R
-  const S  = St + Sr + Sv + S_el();            // J/(mol·K)
-  const H  = U + R * T;                        // H = U + RT
+  const U  = Ut + Ur + Uv + U_el();
+  const Cv = Cvt + Cvr + Cvv + Cv_el();
+  const Cp = Cv + R;                 // ideal-gas Cp = Cv + R
+  const S  = St + Sr + Sv + S_el();
+  const H  = U + R * T;              // H = U + RT
 
   return {
     Cp, Cv, S, U, H,
@@ -534,12 +390,18 @@ if (mol.kind === "linear") {
       trans: { U: Ut, Cv: Cvt, S: St, Cp: Cvt + R },
       rot:   { U: Ur, Cv: Cvr, S: Sr, Cp: Cvr     },
       vib:   { U: Uv, Cv: Cvv, S: Sv, Cp: Cvv     },
+    },
+    meta: {
+      highestJ_linear: mol.kind === "linear" ? Jused : undefined,
+      highestJ_nonlinear: mol.kind === "nonlinear" ? Jused : undefined,
+      lnq_rot,
     }
   };
 }
 
-// ---------- Example dataset & usage ----------
-// Add linear molecules here:
+// ============================================================================
+// Example dataset & quick demo
+// ============================================================================
 export const molecules = {
   linear: <LinearMolecule[]>[
     {
@@ -547,8 +409,8 @@ export const molecules = {
       kind: "linear",
       M_kg_per_mol: 0.0280134,
       sigma: 2,
-      Brot_cm1: 1.998,                 // rotational constant
-      vib_cm1: [2358.57],              // fundamental (degeneracies listed explicitly if needed)
+      Brot_cm1: 1.998,
+      vib_cm1: [2358.57],
     },
     {
       name: "CO2",
@@ -556,8 +418,7 @@ export const molecules = {
       M_kg_per_mol: 0.0440095,
       sigma: 2,
       Brot_cm1: 0.39021,
-      // list all fundamentals; if a mode is doubly degenerate, include it twice
-      vib_cm1: [1333.0, 667.0, 667.0, 2349.0],
+      vib_cm1: [1333.0, 667.0, 667.0, 2349.0], // include degeneracy explicitly
     },
     {
       name: "HCl",
@@ -568,34 +429,24 @@ export const molecules = {
       vib_cm1: [2886.0],
     },
   ],
-  // placeholder for nonlinear species if/when you add them:
   nonlinear: <NonlinearMolecule[]>[
-    // {
-    //   name: "H2O",
-    //   kind: "nonlinear",
-    //   M_kg_per_mol: 0.01801528,
-    //   sigma: 2,
-    //   A_cm1: 27.877, B_cm1: 14.512, C_cm1: 9.285,
-    //   vib_cm1: [3657, 1595, 3756],
-    // },
+    {
+      name: "H2O",
+      kind: "nonlinear",
+      M_kg_per_mol: 0.01801528,
+      sigma: 2,
+      A_cm1: 27.877, B_cm1: 14.512, C_cm1: 9.285,
+      vib_cm1: [3657, 1595, 3756],
+    },
   ],
 };
 
-// quick demo:
+// Node demo (ignored in browser bundlers)
 if (typeof window === "undefined") {
-  // Node.js demo
   const T = 298.15;
   const p = 1.01325e5;
   const co2 = molecules.linear[1];
-  const out = thermoRRHO(co2, T, p);
-  console.log(co2.name, "@", T, "K:");
-  console.log("Cp, Cv, S, U, H =", out.Cp, out.Cv, out.S, out.U, out.H);
+  const out = thermoRRHO(co2, T, { p_Pa: p });
+  console.log(`${co2.name} @ ${T} K: Cp=${out.Cp.toFixed(3)} Cv=${out.Cv.toFixed(3)} S=${out.S.toFixed(3)} U=${out.U.toFixed(1)} H=${out.H.toFixed(1)} Jmax_lin=${out.meta.highestJ_linear}`);
 }
-
-
-    // Initial render
-    molSel.selectedIndex = 0; render(298.15);
-  </script>
-</body>
-</html>
 
