@@ -65,7 +65,7 @@
   <section class="hero">
     <div>
       <h1>Accurate Thermodynamic Data in Seconds — No Installation Required</h1>
-      <p>Explore various thermodynamic values for molecules like CH<sub>4</sub>, O<sub>2</sub>, CO, and NH<sub>3</sub>. Perfect for <b>students</b>, <b>educators</b>, and <b>researchers</b>.</p>
+      <p>Explore various thermodynamic values for molecules like CH<sub>4</sub>, O<sub>2</sub>, CO, H<sub>2</sub>O, and NH<sub>3</sub>. Perfect for <b>students</b>, <b>educators</b>, and <b>researchers</b>.</p>
 
       <div class="points">
         <div class="point"><i>⚡</i><div><b>Instant Calculations</b><br><span class="kicker">Enter a molecule and temperature, get results immediately.</span></div></div>
@@ -90,6 +90,7 @@
           <option value="O2">O₂</option>
           <option value="CO">CO</option>
           <option value="H2O">H₂O</option>
+          <option value="NH3">NH₃</option>
         </select>
 
         <div class="unit">
@@ -110,8 +111,11 @@
         </table>
       </div>
 
-      <p class="kicker">RRHO ideal gas: exact rotational J-sum, full electronic partition function, Sackur–Tetrode translation, harmonic-oscillator vibration <br>
-        (p° = 1 bar = 100 000 Pa).</p>
+      <p class="kicker">
+        RRHO ideal gas: exact rotational J-sum for linear molecules; classical rigid-rotor for nonlinear molecules;
+        full electronic partition function; Sackur–Tetrode translation; harmonic-oscillator vibration
+        (p° = 1 bar = 100 000 Pa).
+      </p>
     </aside>
   </section>
 
@@ -130,7 +134,7 @@ const h  = 6.62607015e-34;     // J·s
 const c  = 299792458;          // m/s
 const NA = 6.02214076e23;      // 1/mol
 const PI = Math.PI;
-const P_STD = 1.00000e5;       // Pa (100 000)
+const P_STD = 1.00000e5;       // Pa (1 bar = 100 000)
 
 /* ===== Helpers ===== */
 function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }               // cm^-1 -> K
@@ -195,7 +199,6 @@ function electronicContrib(T, states){
 /* ===== Rotation (linear, exact sum with adaptive cap) ===== */
 function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=null){
   const Tpos=clampPos(T), th=clampPos(theta_r);
-  // Good default covering high-T: ~5.25*sqrt(T/theta_r)+20
   const autoCap = Math.max(40, Math.ceil(5.25*Math.sqrt(Tpos/th)+20));
   const CAP = (Jcap==null)? autoCap : Jcap;
 
@@ -210,53 +213,20 @@ function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=null){
   return { U:R*Ebar, Cv:R*(varE/(Tpos*Tpos)), S:R*lnq + (R*Ebar)/Tpos };
 }
 
-/* ===== Rotation (nonlinear) ===== */
-function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,nearlyTol=1e-8){
-  const Tpos=clampPos(T);
-  let Z=0,M1=0,M2=0;
-  const isClose=(a,b)=>Math.abs(a-b)<=nearlyTol*Math.max(1,Math.abs(a),Math.abs(b));
-  const spherical=isClose(thetaA,thetaB)&&isClose(thetaB,thetaC);
-  const prolate=isClose(thetaB,thetaC)&&!spherical;
-  const oblate=isClose(thetaA,thetaB)&&!spherical;
-
-  if(spherical){
-    const theta=(thetaA+thetaB+thetaC)/3;
-    for(let J=0;J<=Jcap;J++){
-      const E=theta*J*(J+1), g=(2*J+1)*(2*J+1), w=g*Math.exp(-E/Tpos);
-      Z+=w; M1+=E*w; M2+=E*E*w; if(w<relTol*Math.max(Z,1)&&J>3) break;
-    }
-  }else if(prolate||oblate){
-    if(prolate){
-      const B=thetaB,A=thetaA,delta=A-B;
-      for(let J=0;J<=Jcap;J++){
-        const base=B*J*(J+1);
-        for(let K=-J;K<=J;K++){
-          const E=base+delta*K*K, gM=(2*J+1), w=gM*Math.exp(-E/Tpos);
-          Z+=w; M1+=E*w; M2+=E*E*w;
-        }
-      }
-    }else{
-      const B=thetaA,C=thetaC,delta=C-B;
-      for(let J=0;J<=Jcap;J++){
-        const base=B*J*(J+1);
-        for(let K=-J;K<=J;K++){
-          const E=base+delta*K*K, gM=(2*J+1), w=gM*Math.exp(-E/Tpos);
-          Z+=w; M1+=E*w; M2+=E*E*w;
-        }
-      }
-    }
-  }else{
-    for(let J=0;J<=Jcap;J++){
-      for(let K=-J;K<=J;K++){
-        const E=0.5*(thetaA+thetaB)*(J*(J+1)-K*K) + thetaC*K*K;
-        const gM=(2*J+1), w=gM*Math.exp(-E/Tpos);
-        Z+=w; M1+=E*w; M2+=E*E*w;
-      }
-    }
-  }
-  const lnq=Math.log(Z/sigma), Ebar=M1/Z, varE=Math.max(0,M2/Z - Ebar*Ebar);
-  return { U:R*Ebar, Cv:R*(varE/(Tpos*Tpos)), S:R*lnq + (R*Ebar)/Tpos };
+/* ===== Rotation (nonlinear, classical rigid-rotor) ===== */
+function rotNonlinearClassical(T, sigma, thetaA, thetaB, thetaC){
+  const Tpos = clampPos(T);
+  // q_rot = (sqrt(pi)/sigma) * T^(3/2) / sqrt(thetaA*thetaB*thetaC)
+  const lnq = Math.log(Math.sqrt(Math.PI)/sigma) + 1.5*Math.log(Tpos) - 0.5*Math.log(thetaA*thetaB*thetaC);
+  const U  = 1.5*R*Tpos;     // J/mol
+  const Cv = 1.5*R;          // J/(mol·K)
+  const S  = R*(lnq + 1.5);  // S = R ln q + U/T
+  return {U,Cv,S};
 }
+
+/* (Kept for reference; not used now for nonlinear)
+function rotNonlinearExact(...) { ... }
+*/
 
 /* ===== Master aggregator ===== */
 function thermoRRHO(mol,T){
@@ -271,7 +241,7 @@ function thermoRRHO(mol,T){
     ({U:Ur,Cv:Cvr,S:Sr}=rotLinearExact(T,mol.sigma,th));
   }else{
     const [tA,tB,tC]=thetasRotNonlinear(mol.A_cm1,mol.B_cm1,mol.C_cm1);
-    ({U:Ur,Cv:Cvr,S:Sr}=rotNonlinearExact(T,mol.sigma,tA,tB,tC));
+    ({U:Ur,Cv:Cvr,S:Sr}=rotNonlinearClassical(T,mol.sigma,tA,tB,tC)); // <-- classical for all nonlinear
   }
 
   const {U:Uel,Cv:Cvel,S:Sel}=electronicContrib(T, mol.electronic || [{g:1,Te_cm1:0}]);
@@ -286,9 +256,9 @@ function thermoRRHO(mol,T){
   return {Cp,Cv,S,U,H,G};
 }
 
-/* ===== Dataset with electronic states =====
-   g values are degeneracies used in q_el; Te_cm1 are term energies (cm^-1).
-   You can add/edit lists per species as needed. */
+/* ===== Dataset (now includes NH3) =====
+   g = electronic degeneracy in q_el; Te_cm1 = term energy in cm^-1.
+*/
 const molecules={
   CO:{ name:"CO", kind:"linear", M_kg_per_mol:0.02801, sigma:1, Brot_cm1:1.92253,
       vib_cm1:[2143],
@@ -297,8 +267,8 @@ const molecules={
   O2:{ name:"O2", kind:"linear", M_kg_per_mol:0.031999, sigma:2, Brot_cm1:1.43768,
       vib_cm1:[1556],
       electronic:[
-        {g:3, Te_cm1:0},     
-        {g:2, Te_cm1:7918.1},  
+        {g:3, Te_cm1:0},
+        {g:2, Te_cm1:7918.1},
         {g:1, Te_cm1:13195.1},
         {g:1, Te_cm1:33057.3}
       ] },
@@ -306,14 +276,18 @@ const molecules={
   CH4:{ name:"CH4", kind:"nonlinear", M_kg_per_mol:0.016042, sigma:12,
       A_cm1:5.2412, B_cm1:5.2412, C_cm1:5.2412,
       vib_cm1:[2917,1534,1534,3019,3019,3019,1306,1306,1306],
-      electronic:[       
-        {g:1, Te_cm1:0},  
-        {g:1, Te_cm1:68730} ]  },
+      electronic:[ {g:1, Te_cm1:0} ] },
 
   H2O:{ name:"H2O", kind:"nonlinear", M_kg_per_mol:0.01801528, sigma:2,
-      A_cm1:27.877, B_cm1:14.512, C_cm1:9.285,
+      A_cm1:27.8770, B_cm1:14.5120, C_cm1:9.2850,
       vib_cm1:[3657,1595,3756],
-      electronic:[ {g:1,Te_cm1:0}, {g:1,Te_cm1:53800}]      },
+      electronic:[ {g:1,Te_cm1:0}, {g:1,Te_cm1:53800} ] },
+
+  NH3:{ name:"NH3", kind:"nonlinear", M_kg_per_mol:0.01703052, sigma:3,
+      A_cm1:9.44430, B_cm1:9.44430, C_cm1:6.19600,
+      // Fundamentals; E modes doubled
+      vib_cm1:[3337, 950, 3444, 3444, 1627, 1627],
+      electronic:[ {g:1, Te_cm1:0} ] }
 };
 
 /* ===== UI wiring ===== */
