@@ -31,17 +31,33 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.08)}
   .calc{padding:18px}
   .calc h3{margin:.2rem 0 .8rem}
-  .row{
+  /* let the temp column have a larger minimum width */
+.row{
   display:grid;
-  grid-template-columns:1fr 1fr auto; /* let the button auto-size */
+  grid-template-columns: 1fr minmax(180px,1fr) auto; /* select | temp | button */
   gap:10px;
 }
 
-@media (max-width:600px){
-  .row{
-    grid-template-columns:1fr; /* stack molecule, T, and button vertically */
-  }
+/* inside the temp+unit group, guarantee space for the number */
+.unit{
+  display:grid;
+  grid-template-columns: minmax(140px,1fr) 44px; /* temp | K */
+  gap:8px;
 }
+
+/* numeric readability */
+.calc input[type="number"]{
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* make the little 'K' box slimmer */
+.unit input[disabled]{
+  width:44px;
+  text-align:center;
+  padding:8px;
+}
+
 
   select,input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
   .unit{display:grid;grid-template-columns:1fr 56px;gap:8px}
