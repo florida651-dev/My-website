@@ -31,7 +31,18 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.08)}
   .calc{padding:18px}
   .calc h3{margin:.2rem 0 .8rem}
-  .row{display:grid;grid-template-columns:1fr 1fr 64px;gap:10px;margin-bottom:10px}
+  .row{
+  display:grid;
+  grid-template-columns:1fr 1fr auto; /* let the button auto-size */
+  gap:10px;
+}
+
+@media (max-width:600px){
+  .row{
+    grid-template-columns:1fr; /* stack molecule, T, and button vertically */
+  }
+}
+
   select,input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
   .unit{display:grid;grid-template-columns:1fr 56px;gap:8px}
   .calc button{width:100%;margin:6px 0 12px}
@@ -105,7 +116,7 @@
         </table>
       </div>
 
-      <p class="kicker">Based on RRHO statistical thermodynamics (p° = 101 325 Pa). Validated against NIST CCCBDB and ATcT.</p>
+      <p class="kicker">Based on RRHO statistical thermodynamics (p° = 101 325 Pa). Validated against NIST CCCBDB.</p>
     </aside>
   </section>
 
