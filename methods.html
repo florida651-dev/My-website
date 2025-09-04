@@ -57,33 +57,33 @@
     <div class="brand">ThermoCalc Web</div>
     <nav class="nav">
       <a href="/">Home</a>
-      <a href="/methods.html">Methods &amp; Validation</a>
+      <a href="/methods.html"><b>Methods &amp; Validation</b></a>
       <a href="/purchase.html">Purchase</a>
     </nav>
   </header>
 
   <section class="card">
-    <h2>Methods</h2>
-    <p class="kicker">RRHO ideal-gas model with explicit electronic degeneracy; standard pressure fixed to <b>101 325&nbsp;Pa</b>. This page explains <i>what</i> is computed and <i>why</i> it’s accurate—while keeping implementation details private.</p>
+    <h2>Methods <span class="badge">p° = 1&nbsp;bar</span></h2>
+    <p class="kicker">RRHO ideal-gas model with full electronic partition functions. Linear rotors use an exact J-sum; non-linear rotors use the classical rigid-rotor formula. This page explains <i>what</i> is computed and <i>why</i> it’s accurate—implementation details are intentionally brief.</p>
 
     <div class="cols">
       <div>
         <h3>Partition functions</h3>
 
         <div class="eq" aria-label="Translational partition function">
-          <b>Translation (molar):</b><br>
-          <span class="mono">q<sub>trans</sub> = ((2π m k<sub>B</sub>T)/h²)<sup>3/2</sup> · (k<sub>B</sub>T/p)</span>
+          <b>Translation (molar, Sackur–Tetrode):</b><br>
+          <span class="mono">q<sub>trans</sub> = \(\big((2\pi m k_B T)/h^2\big)^{3/2}\) · \((k_B T/p)\)</span>
         </div>
 
         <div class="eq" aria-label="Linear rotational partition function">
-          <b>Linear rotation (exact sum):</b><br>
-          <span class="mono">E<sub>J</sub>/k<sub>B</sub> = θ<sub>r</sub> J(J+1),&nbsp; g = (2J+1)</span><br>
+          <b>Linear rotation (exact J-sum):</b><br>
+          <span class="mono">E<sub>J</sub>/k<sub>B</sub> = θ<sub>r</sub> J(J+1), g = (2J+1)</span><br>
           <span class="mono">q<sub>rot</sub> = (1/σ) · Σ<sub>J=0..∞</sub> g · e<sup>−E<sub>J</sub>/(k<sub>B</sub>T)</sup></span>
         </div>
 
-        <div class="eq" aria-label="Nonlinear rotational partition function">
-          <b>Non-linear rotation (exact):</b><br>
-          Rigid-rotor Hamiltonian diagonalized for spherical/symmetric/asymmetric tops; result divided by symmetry number σ.
+        <div class="eq" aria-label="Nonlinear rotational partition function (classical)">
+          <b>Non-linear rotation (classical rigid-rotor):</b><br>
+          <span class="mono">q<sub>rot</sub> = \(\dfrac{\sqrt{\pi}}{σ}\) · \(\dfrac{T^{3/2}}{\sqrt{θ_A θ_B θ_C}}\)</span>
         </div>
 
         <div class="eq" aria-label="Vibrational partition function">
@@ -92,33 +92,34 @@
         </div>
 
         <div class="eq" aria-label="Electronic partition function">
-          <b>Electronic:</b><br>
-          <span class="mono">q<sub>el</sub> = g<sub>el</sub></span> 
+          <b>Electronic (full multi-state):</b><br>
+          <span class="mono">q<sub>el</sub> = Σ<sub>j</sub> g<sub>j</sub> e<sup>−θ<sub>j</sub>/T</sup></span> &nbsp; (θ<sub>0</sub>=0 for ground state)
         </div>
 
-        <p class="note">Notation: θ<sub>i</sub> ≡ hν<sub>i</sub>/k<sub>B</sub> (vibrational temperature). Symmetry (σ) is applied wherever appropriate.</p>
+        <p class="note">Notation: θ<sub>i</sub> ≡ hν<sub>i</sub>/k<sub>B</sub> (vibrational temperatures); θ<sub>A,B,C</sub> are rotational temperatures from A,B,C (cm⁻¹). Symmetry (σ) is applied where appropriate.</p>
       </div>
 
       <div>
         <h3>Thermodynamic relations</h3>
         <div class="eq" aria-label="Thermodynamic identities">
-          All terms use the same <span class="mono">q</span> they’re computed from:<br>
+          Each contribution uses its own partition function:<br>
           <span class="mono">S = R ln q + U/T</span>,&nbsp;
           <span class="mono">U = R ⟨Ē⟩</span>,&nbsp;
           <span class="mono">C<sub>v</sub> = R·Var(Ē)/T²</span><br>
           <span class="mono">C<sub>p</sub> = C<sub>v</sub> + R</span>,&nbsp;
-          <span class="mono">H = U + RT</span>
+          <span class="mono">H = U + RT</span>,&nbsp;
+          <span class="mono">G = H − TS</span>
         </div>
-        <p class="note">Definitions: Ē ≡ E/k<sub>B</sub> (dimensionless). Assumptions: ideal gas; rigid rotor; harmonic oscillator; fundamentals listed with explicit degeneracies.</p>
 
         <h3>Scope &amp; approximations</h3>
         <ul class="list">
-          <li><b>RRHO</b>: Vibrational–rotational coupling and anharmonicity are neglected.</li>
-          <li><b>Ideal gas</b>: Valid at low–moderate pressures; standard state p° = 101 325 Pa.</li>
-          <li><b>Electronic</b>: Electronic excitations are excluded due to minimal contributions.</li>
+          <li><b>RRHO:</b> rigid rotor; harmonic oscillator; ideal gas at p° = 1&nbsp;bar.</li>
+          <li><b>Rotation:</b> exact J-sum (linear); classical rigid-rotor (non-linear).</li>
+          <li><b>Vibration:</b> fundamentals with explicit degeneracies; no anharmonic or vib-rot coupling.</li>
+          <li><b>Electronic:</b> summed over supplied terms (degeneracies &amp; term energies); ground state dominates at 298&nbsp;K unless otherwise noted.</li>
         </ul>
 
-        <p class="hint">Implementation details (e.g., numerical summation schemes, convergence controls) are intentionally omitted. We follow physically standard formulations and apply quality checks internally.</p>
+        <p class="hint">These choices match common textbook/reference practice at 298&nbsp;K and deliver room-temperature benchmarks within typical rounding of published tables.</p>
       </div>
     </div>
   </section>
@@ -129,27 +130,27 @@
       <div>
         <h3>On this page</h3>
         <ul class="list">
-          <li>Textbook-level formulas and assumptions (transparent &amp; citable).</li>
-          <li>Representative validation at 298.15 K.</li>
-          <li>Clear notation for partition-function components.</li>
+          <li>Transparent formulas and assumptions.</li>
+          <li>Representative 298.15&nbsp;K validation at p° = 1&nbsp;bar.</li>
+          <li>Clear notation for each partition-function component.</li>
         </ul>
       </div>
       <div>
         <h3>Full service (preview)</h3>
         <ul class="list">
-          <li>Arbitrary <b>T</b> and <b>p</b> ranges, including grids and custom step sizes.</li>
-          <li>Exportable <b>CSV</b> tables for thermodynamic values, and K(T) where applicable.</li>
-          <li>Optional inclusion/exclusion of excited electronic states.</li>
+          <li>Arbitrary <b>T</b> and <b>p</b> ranges, grids, and custom step sizes.</li>
+          <li>Exportable <b>CSV</b> tables for U, S, C<sub>p</sub>, H, G, and K(T) where applicable.</li>
+          <li>Optional inclusion of low-lying electronic states for high-T work.</li>
           <li>Per-molecule summaries with units and reference state clearly labeled.</li>
         </ul>
-        <p class="note">Details and purchase options are available on the <a href="/purchase.html">Purchase</a> page.</p>
+        <p class="note">See the <a href="/purchase.html">Purchase</a> page for details.</p>
       </div>
     </div>
   </section>
 
   <section class="card">
-    <h2>Validation <span class="badge">298.15 K</span></h2>
-    <p class="kicker">Comparison of ThermoCalc vs. CCCBDB reference values for S° and C<sub>p</sub>. Δ = (ThermoCalc − CCCBDB). Typical agreement is within ~0.1–0.3% for these species under RRHO.</p>
+    <h2>Validation <span class="badge">298.15&nbsp;K</span></h2>
+    <p class="kicker">Comparison of ThermoCalc vs. CCCBDB at p° = 1&nbsp;bar. Δ = (ThermoCalc − CCCBDB). Typical agreement is within ~0.1–0.3% for these species under RRHO.</p>
 
     <div style="overflow:auto">
       <table aria-label="Validation table at 298.15 K">
@@ -167,30 +168,35 @@
         <tbody>
           <tr>
             <td>CO</td>
-            <td>197.54</td><td>197.66</td><td>−0.12</td>
+            <td>197.65</td><td>197.66</td><td>−0.01</td>
             <td>29.13</td><td>29.14</td><td>−0.01</td>
           </tr>
           <tr>
             <td>O₂</td>
-            <td>205.02</td><td>205.15</td><td>−0.13</td>
+            <td>205.13</td><td>205.15</td><td>−0.02</td>
             <td>29.36</td><td>29.38</td><td>−0.02</td>
           </tr>
           <tr>
             <td>CH₄</td>
-            <td>186.21</td><td>186.37</td><td>−0.16</td>
+            <td>186.32</td><td>186.37</td><td>−0.05</td>
             <td>35.64</td><td>35.69</td><td>−0.05</td>
           </tr>
           <tr>
+            <td>H₂O</td>
+            <td>188.72</td><td>188.84</td><td>−0.12</td>
+            <td>33.48</td><td>33.60</td><td>−0.12</td>
+          </tr>
+          <tr>
             <td>NH₃</td>
-            <td>192.98</td><td>192.77</td><td>+0.21</td>
-            <td>35.28</td><td>35.63</td><td>−0.35</td>
+            <td>193.12</td><td>192.77</td><td>+0.35</td>
+            <td>35.48</td><td>35.63</td><td>−0.15</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <p class="note">
-      Small differences arise from the RRHO model (no explicit anharmonicity or vib-rot coupling). Standard state p° = 101 325 Pa.
+      Residual differences reflect classical vs. quantum choices for non-linear rotors, reference rounding of fundamentals, and molar-mass precision. Standard state is p° = 1&nbsp;bar throughout.
     </p>
   </section>
 
