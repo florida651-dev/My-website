@@ -109,7 +109,7 @@
         </table>
       </div>
 
-      <p class="kicker">RRHO ideal-gas model (p° = 101 325 Pa). Electronic contribution uses ground-state degeneracy only.</p>
+      <p class="kicker">RRHO ideal-gas model with <b>full electronic partition function</b> included by default (p° = 101 325 Pa).</p>
     </aside>
   </section>
 
@@ -131,7 +131,7 @@ const PI = Math.PI;
 const P_STD = 1.01325e5;       // Pa (101 325)
 
 /* ===== Helpers ===== */
-function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; } // cm^-1 -> K
+function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }               // cm^-1 -> K
 function thetasVib(arr){ return arr.map(thetaFromCm1); }
 function thetasRotLinear(B){ return thetaFromCm1(B); }
 function thetasRotNonlinear(A,B,C){ return [thetaFromCm1(A),thetaFromCm1(B),thetaFromCm1(C)]; }
@@ -172,16 +172,28 @@ function S_trans(T,p,M){
   return R*(Math.log(factor)+2.5);
 }
 
-/* ===== Electronic (ground only) ===== */
-function electronicGroundOnly(T, g0=1){
-  const Z = Math.max(g0,1e-300); // avoid log(0)
-  const S = R*Math.log(Z);       // U≈0, Cv≈0 for ground only
-  return {U:0, Cv:0, S};
+/* ===== Electronic states: full multi-state q_el ===== */
+function electronicContrib(T, states){
+  // states: [{g, Te_cm1}]  — include ground with Te_cm1: 0
+  let Z=0, M1=0, M2=0, Tpos=clampPos(T);
+  for(const s of (states||[])){
+    const E = thetaFromCm1(Number(s.Te_cm1)||0); // K
+    const g = Number(s.g)||0;
+    const w = g * Math.exp(-E/Tpos);
+    Z += w; M1 += E*w; M2 += E*E*w;
+  }
+  if(Z<=0){ return {U:0, Cv:0, S:0}; }
+  const Ebar = M1/Z, varE = Math.max(0, M2/Z - Ebar*Ebar);
+  const U = R*Ebar;
+  const Cv = R*(varE/(Tpos*Tpos));
+  const S = R*Math.log(Z) + U/Tpos;
+  return {U,Cv,S};
 }
 
 /* ===== Rotation (linear, exact sum with adaptive cap) ===== */
 function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=null){
   const Tpos=clampPos(T), th=clampPos(theta_r);
+  // Good default covering high-T: ~5.25*sqrt(T/theta_r)+20
   const autoCap = Math.max(40, Math.ceil(5.25*Math.sqrt(Tpos/th)+20));
   const CAP = (Jcap==null)? autoCap : Jcap;
 
@@ -260,9 +272,8 @@ function thermoRRHO(mol,T){
     ({U:Ur,Cv:Cvr,S:Sr}=rotNonlinearExact(T,mol.sigma,tA,tB,tC));
   }
 
-  // Electronic: ground only
-  const g0 = (mol.electronic_base && mol.electronic_base[0] && mol.electronic_base[0].g) ? mol.electronic_base[0].g : 1;
-  const {U:Uel,Cv:Cvel,S:Sel} = electronicGroundOnly(T,g0);
+  // Always use full electronic partition function (multi-state)
+  const {U:Uel,Cv:Cvel,S:Sel}=electronicContrib(T, mol.electronic || [{g:1,Te_cm1:0}]);
 
   const U = Ut + Ur + Uv + Uel;       // J/mol
   const Cv = Cvt + Cvr + Cvv + Cvel;  // J/(mol·K)
@@ -274,20 +285,36 @@ function thermoRRHO(mol,T){
   return {Cp,Cv,S,U,H,G};
 }
 
-/* ===== Dataset (ground-state only) ===== */
+/* ===== Dataset with electronic states =====
+   g values are degeneracies used in q_el; Te_cm1 are term energies (cm^-1).
+   You can add/edit lists per species as needed. */
 const molecules={
   CO:{ name:"CO", kind:"linear", M_kg_per_mol:0.02801, sigma:1, Brot_cm1:1.92253,
-      vib_cm1:[2143], electronic_base:[{g:1,Te_cm1:0}] },
+      vib_cm1:[2143],
+      electronic:[ {g:1,Te_cm1:0} ] }, 
+  
   O2:{ name:"O2", kind:"linear", M_kg_per_mol:0.031999, sigma:2, Brot_cm1:1.43768,
-      vib_cm1:[1556], electronic_base:[{g:3,Te_cm1:0}] },
+      vib_cm1:[1556],
+      // Ground X^3Σg− (g=3) + two low-lying singlets (approx term energies).
+      electronic:[
+        {g:3, Te_cm1:0},     
+        {g:2, Te_cm1:7918.1},  
+        {g:1, Te_cm1:13195.1},
+        {g:1, Te_cm1:33057.3}
+      ] },
+
   CH4:{ name:"CH4", kind:"nonlinear", M_kg_per_mol:0.016042, sigma:12,
       A_cm1:5.2412, B_cm1:5.2412, C_cm1:5.2412,
       vib_cm1:[2917,1534,1534,3019,3019,3019,1306,1306,1306],
-      electronic_base:[{g:1,Te_cm1:0}] },
+      electronic:[       
+        {g:1, Te_cm1:0},  
+        {g:1, Te_cm1:68730} ]  },
+
   NH3:{ name:"NH3", kind:"nonlinear", M_kg_per_mol:0.0170306, sigma:3,
       A_cm1:9.4443, B_cm1:9.4443, C_cm1:6.196,
       vib_cm1:[3337,950,3444,1627],
-      electronic_base:[{g:1,Te_cm1:0}] }
+      electronic:[ {g:1,Te_cm1:0} 
+                {g:1, Te_cm1:46136} ]      }
 };
 
 /* ===== UI wiring ===== */
@@ -309,6 +336,7 @@ function computeAndRender(){
     tbody.innerHTML='<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
     return;
   }
+
   const r=thermoRRHO(mol,T);
   const rows=[
     ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
