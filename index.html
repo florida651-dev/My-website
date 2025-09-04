@@ -196,7 +196,7 @@ function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=200){
   return { U:R*Ebar, Cv:R*(varE/(Tpos*Tpos)), S:R*lnq + (R*Ebar)/Tpos };
 }
 
-/* ===== Rotation (nonlinear, exact via symmetric/near-symmetric cases) ===== */
+/* ===== Rotation (nonlinear, symmetric/near-symmetric handling) ===== */
 function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,nearlyTol=1e-8){
   const Tpos=Math.max(T,1e-12);
   let Z=0,M1=0,M2=0;
@@ -234,7 +234,7 @@ function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,ne
   }else{
     for(let J=0;J<=Jcap;J++){
       const n=2*J+1;
-      // Diagonal approximation for speed (good for small asymmetry):
+      // Diagonal approximation for speed:
       for(let K=-J;K<=J;K++){
         const E=0.5*(thetaA+thetaB)*(J*(J+1)-K*K) + thetaC*K*K;
         const gM=(2*J+1), w=gM*Math.exp(-E/Tpos);
@@ -272,7 +272,7 @@ function thermoRRHO(mol,T){
   const Cp = Cv + R;                  // J/(mol·K)
   const S  = St + Sr + Sv + Sel;      // J/(mol·K)
   const H  = U + R*T;                 // J/mol
-  const G = r.H - T*r.S;   // J/mol
+  const G  = H - T*S;                 // J/mol   <-- fixed
 
   return {Cp,Cv,S,U,H,G};
 }
@@ -302,7 +302,10 @@ function computeAndRender(){
   const key=molSel.value;
   const T=parseFloat(tempEl.value);
   const mol=molecules[key];
-  if(!mol || !(T>0)){ tbody.innerHTML='<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>'; return; }
+  if(!mol || !(T>0)){
+    tbody.innerHTML='<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
+    return;
+  }
 
   const r=thermoRRHO(mol,T);
   const rows=[
@@ -310,13 +313,13 @@ function computeAndRender(){
     ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
     ["S",             format(r.S ), "J/(mol·K)"],
     ["U",             format(r.U/1000,3), "kJ/mol"],
-    ["H",             format(r.H/1000,3), "kJ/mol"]
-    ["G", format(G/1000,3), "kJ/mol"]
-
+    ["H",             format(r.H/1000,3), "kJ/mol"],
+    ["G",             format(r.G/1000,3), "kJ/mol"]  // <-- fixed
   ];
   tbody.innerHTML=rows.map(([k,v,u])=>`<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`).join("");
 }
 </script>
+
 </body>
 </html>
 
