@@ -31,33 +31,10 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.08)}
   .calc{padding:18px}
   .calc h3{margin:.2rem 0 .8rem}
-  /* let the temp column have a larger minimum width */
-.row{
-  display:grid;
-  grid-template-columns: 1fr minmax(180px,1fr) auto; /* select | temp | button */
-  gap:10px;
-}
-
-/* inside the temp+unit group, guarantee space for the number */
-.unit{
-  display:grid;
-  grid-template-columns: minmax(140px,1fr) 44px; /* temp | K */
-  gap:8px;
-}
-
-/* numeric readability */
-.calc input[type="number"]{
-  text-align:right;
-  font-variant-numeric: tabular-nums;
-}
-
-/* make the little 'K' box slimmer */
-.unit input[disabled]{
-  width:44px;
-  text-align:center;
-  padding:8px;
-}
-
+  .row{display:grid;grid-template-columns:1fr minmax(180px,1fr) auto;gap:10px}
+  .unit{display:grid;grid-template-columns:minmax(140px,1fr) 44px;gap:8px}
+  .calc input[type="number"]{text-align:right;font-variant-numeric:tabular-nums}
+  .unit input[disabled]{width:44px;text-align:center;padding:8px}
 
   select,input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
   .unit{display:grid;grid-template-columns:1fr 56px;gap:8px}
@@ -70,6 +47,12 @@
   .footnote{max-width:1040px;margin:18px auto 0;padding:0 16px;color:var(--muted);font-size:14px}
   footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
   .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;width:1px;overflow:hidden;white-space:nowrap}
+
+  /* Electronic options block */
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
+  .opts small{color:var(--muted)}
+  .opts .row2{display:grid;grid-template-columns: auto 1fr;gap:10px;align-items:center}
+  .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:6px}
 
   @media (max-width:960px){ .hero{grid-template-columns:1fr} }
 </style>
@@ -123,6 +106,15 @@
         <button class="btn btn-primary" id="calc" type="button">Calculate</button>
       </div>
 
+      <!-- Electronic options -->
+      <div class="mini opts" aria-label="Electronic state options">
+        <div class="row2">
+          <label><input type="checkbox" id="incEl"> Include excited electronic states</label>
+          <input id="elList" placeholder="g@Te_cm1; g@Te_cm1 …  (e.g., 2@7882; 1@13120)" aria-label="Electronic states list">
+        </div>
+        <small>Always includes the ground state. Format: <code>g@Te</code> in cm⁻¹; separate with <code>;</code>. <span class="badge">Tip</span> O₂: <code>2@7882; 1@13120</code> (a¹Δ<sub>g</sub>, b¹Σ<sub>g</sub><sup>+</sup>).</small>
+      </div>
+
       <div class="mini" role="region" aria-label="Results">
         <table>
           <thead>
@@ -132,7 +124,7 @@
         </table>
       </div>
 
-      <p class="kicker">Based on RRHO statistical thermodynamics (p° = 101 325 Pa). Validated against NIST CCCBDB.</p>
+      <p class="kicker">RRHO ideal-gas model (p° = 101 325 Pa). <b>Electronic option</b> adds low-lying excited states into U, S, C<sub>v</sub>, C<sub>p</sub>.</p>
     </aside>
   </section>
 
@@ -158,10 +150,11 @@ function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }               // cm^-1 ->
 function thetasVib(arr){ return arr.map(thetaFromCm1); }
 function thetasRotLinear(B){ return thetaFromCm1(B); }
 function thetasRotNonlinear(A,B,C){ return [thetaFromCm1(A),thetaFromCm1(B),thetaFromCm1(C)]; }
+function clampPos(x){ return Math.max(x,1e-12); }
 
 /* ===== Vibrations ===== */
 function U_vib(T, theta_v, includeZPE=false){
-  let sum=0, Tpos=Math.max(T,1e-12);
+  let sum=0, Tpos=clampPos(T);
   for(const th of theta_v){
     const x=th/Tpos, ex=Math.exp(x);
     sum += th/(ex-1) + (includeZPE?0.5*th:0);
@@ -169,7 +162,7 @@ function U_vib(T, theta_v, includeZPE=false){
   return R*sum;
 }
 function Cv_vib(T, theta_v){
-  let s=0, Tpos=Math.max(T,1e-12);
+  let s=0, Tpos=clampPos(T);
   for(const th of theta_v){
     const x=th/Tpos, ex=Math.exp(x), d=ex-1;
     s += x*x*(ex/(d*d));
@@ -177,7 +170,7 @@ function Cv_vib(T, theta_v){
   return R*s;
 }
 function S_vib(T, theta_v){
-  let s=0, Tpos=Math.max(T,1e-12);
+  let s=0, Tpos=clampPos(T);
   for(const th of theta_v){
     const x=th/Tpos, ex=Math.exp(x);
     s += (x/(ex-1)) - Math.log(1-Math.exp(-x));
@@ -194,27 +187,33 @@ function S_trans(T,p,M){
   return R*(Math.log(factor)+2.5);
 }
 
-/* ===== Electronic states ===== */
+/* ===== Electronic states (multi-state support) ===== */
 function electronicContrib(T, states){
-  // states: [{g, Te_cm1}]
-  let Z=0, M1=0, M2=0;
+  // states: [{g, Te_cm1}] including ground (Te_cm1=0)
+  if(!states || states.length===0) return {U:0,Cv:0,S:0};
+  let Z=0, M1=0, M2=0, Tpos=clampPos(T);
   for(const s of states){
-    const E = thetaFromCm1(s.Te_cm1);
-    const w = s.g * Math.exp(-E/T);
+    const E = thetaFromCm1(Number(s.Te_cm1)||0);
+    const g = Number(s.g)||0;
+    const w = g * Math.exp(-E/Tpos);
     Z += w; M1 += E*w; M2 += E*E*w;
   }
-  const lnq = Math.log(Z);
+  if(Z<=0) return {U:0,Cv:0,S:0};
   const Ebar = M1/Z, varE = Math.max(0, M2/Z - Ebar*Ebar);
-  const U = R*Ebar, Cv = R*(varE/(T*T)), S = R*lnq + U/T;
+  const U = R*Ebar, Cv = R*(varE/(Tpos*Tpos)), S = R*Math.log(Z) + U/Tpos;
   return {U,Cv,S};
 }
 
-/* ===== Rotation (linear, exact sum) ===== */
-function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=200){
-  const Tpos=Math.max(T,1e-12);
+/* ===== Rotation (linear, exact sum with adaptive cap) ===== */
+function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=null){
+  const Tpos=clampPos(T), th=clampPos(theta_r);
+  // Adaptive Jcap: ~5.25*sqrt(T/theta_r) + margin covers 1e-12 tail well
+  const autoCap = Math.max(40, Math.ceil(5.25*Math.sqrt(Tpos/th)+20));
+  const CAP = (Jcap==null)? autoCap : Jcap;
+
   let Z=0,M1=0,M2=0;
-  for(let J=0; J<=Jcap; J++){
-    const JJ1=J*(J+1), g=(2*J+1), E=theta_r*JJ1;
+  for(let J=0; J<=CAP; J++){
+    const JJ1=J*(J+1), g=(2*J+1), E=th*JJ1;
     const w=g*Math.exp(-E/Tpos);
     Z+=w; M1+=E*w; M2+=E*E*w;
     if(w<relTol*Math.max(Z,1) && J>5) break;
@@ -223,9 +222,9 @@ function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=200){
   return { U:R*Ebar, Cv:R*(varE/(Tpos*Tpos)), S:R*lnq + (R*Ebar)/Tpos };
 }
 
-/* ===== Rotation (nonlinear, symmetric/near-symmetric handling) ===== */
+/* ===== Rotation (nonlinear) ===== */
 function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,nearlyTol=1e-8){
-  const Tpos=Math.max(T,1e-12);
+  const Tpos=clampPos(T);
   let Z=0,M1=0,M2=0;
   const isClose=(a,b)=>Math.abs(a-b)<=nearlyTol*Math.max(1,Math.abs(a),Math.abs(b));
   const spherical=isClose(thetaA,thetaB)&&isClose(thetaB,thetaC);
@@ -260,8 +259,6 @@ function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,ne
     }
   }else{
     for(let J=0;J<=Jcap;J++){
-      const n=2*J+1;
-      // Diagonal approximation for speed:
       for(let K=-J;K<=J;K++){
         const E=0.5*(thetaA+thetaB)*(J*(J+1)-K*K) + thetaC*K*K;
         const gM=(2*J+1), w=gM*Math.exp(-E/Tpos);
@@ -274,7 +271,7 @@ function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,ne
 }
 
 /* ===== Master aggregator ===== */
-function thermoRRHO(mol,T){
+function thermoRRHO(mol,T, includeExcited=false, userExcitedStates=[]){
   const theta_v=thetasVib(mol.vib_cm1||[]);
   const Uv=U_vib(T,theta_v), Cvv=Cv_vib(T,theta_v), Sv=S_vib(T,theta_v);
 
@@ -289,41 +286,89 @@ function thermoRRHO(mol,T){
     ({U:Ur,Cv:Cvr,S:Sr}=rotNonlinearExact(T,mol.sigma,tA,tB,tC));
   }
 
-  let Uel=0,Cvel=0,Sel=0;
-  if(mol.electronic){
-    ({U:Uel,Cv:Cvel,S:Sel}=electronicContrib(T,mol.electronic));
+  // Build electronic states: always include the ground state(s),
+  // append defaults for this molecule (if requested), then append user list.
+  let states = mol.electronic_base ? mol.electronic_base.slice() : (mol.electronic || [{g:1,Te_cm1:0}]).slice();
+  if(includeExcited){
+    if(mol.electronic_excited) states = states.concat(mol.electronic_excited);
+    if(Array.isArray(userExcitedStates) && userExcitedStates.length) states = states.concat(userExcitedStates);
   }
+  const {U:Uel,Cv:Cvel,S:Sel} = electronicContrib(T, states);
 
   const U = Ut + Ur + Uv + Uel;       // J/mol
   const Cv = Cvt + Cvr + Cvv + Cvel;  // J/(mol·K)
   const Cp = Cv + R;                  // J/(mol·K)
   const S  = St + Sr + Sv + Sel;      // J/(mol·K)
   const H  = U + R*T;                 // J/mol
-  const G  = H - T*S;                 // J/mol   <-- fixed
+  const G  = H - T*S;                 // J/mol
 
   return {Cp,Cv,S,U,H,G};
 }
 
-/* ===== Dataset ===== */
+/* ===== Default dataset (ground + optional excited lists) ===== */
 const molecules={
-  CO:{name:"CO",kind:"linear",M_kg_per_mol:0.02801,sigma:1,Brot_cm1:1.92253,vib_cm1:[2143],electronic:[{g:1,Te_cm1:0}]},
-  O2:{name:"O2",kind:"linear",M_kg_per_mol:0.031999,sigma:2,Brot_cm1:1.43768,vib_cm1:[1556],electronic:[{g:3,Te_cm1:0}]},
-  CH4:{name:"CH4",kind:"nonlinear",M_kg_per_mol:0.016042,sigma:12,A_cm1:5.2412,B_cm1:5.2412,C_cm1:5.2412,
-       vib_cm1:[2917,1534,1534,3019,3019,3019,1306,1306,1306], electronic:[{g:1,Te_cm1:0}]},
-  NH3:{name:"NH3",kind:"nonlinear",M_kg_per_mol:0.0170306,sigma:3,A_cm1:9.4443,B_cm1:9.4443,C_cm1:6.196,
-       vib_cm1:[3337,950,3444,1627], electronic:[{g:1,Te_cm1:0}]}
+  CO:{ name:"CO", kind:"linear", M_kg_per_mol:0.02801, sigma:1, Brot_cm1:1.92253,
+      vib_cm1:[2143],
+      electronic_base:[{g:1,Te_cm1:0}],
+      electronic_excited:[] },
+  O2:{ name:"O2", kind:"linear", M_kg_per_mol:0.031999, sigma:2, Brot_cm1:1.43768,
+      vib_cm1:[1556],
+      electronic_base:[{g:3,Te_cm1:0}],
+      // Two low-lying singlets; edit if you have better term energies.
+      electronic_excited:[{g:2,Te_cm1:7882},{g:1,Te_cm1:13120}] },
+  CH4:{ name:"CH4", kind:"nonlinear", M_kg_per_mol:0.016042, sigma:12,
+      A_cm1:5.2412, B_cm1:5.2412, C_cm1:5.2412,
+      vib_cm1:[2917,1534,1534,3019,3019,3019,1306,1306,1306],
+      electronic_base:[{g:1,Te_cm1:0}], electronic_excited:[] },
+  NH3:{ name:"NH3", kind:"nonlinear", M_kg_per_mol:0.0170306, sigma:3,
+      A_cm1:9.4443, B_cm1:9.4443, C_cm1:6.196,
+      vib_cm1:[3337,950,3444,1627],
+      electronic_base:[{g:1,Te_cm1:0}], electronic_excited:[] }
 };
 
 /* ===== UI wiring ===== */
 document.getElementById('yr').textContent=new Date().getFullYear();
 const molSel=document.getElementById('mol'),
       tempEl=document.getElementById('temp'),
-      tbody=document.getElementById('tbody');
+      tbody=document.getElementById('tbody'),
+      incEl=document.getElementById('incEl'),
+      elList=document.getElementById('elList');
 
 document.getElementById('calc').addEventListener('click', computeAndRender);
-window.addEventListener('DOMContentLoaded', computeAndRender);
+window.addEventListener('DOMContentLoaded', () => {
+  prefillElList();
+  computeAndRender();
+});
+molSel.addEventListener('change', () => { prefillElList(); computeAndRender(); });
+incEl.addEventListener('change', computeAndRender);
+elList.addEventListener('input', debounce(computeAndRender, 200));
 
 function format(n,d=3){ return Number(n).toFixed(d); }
+function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+/* Parse "g@Te; g@Te; ..." into [{g,Te_cm1}] */
+function parseElList(str){
+  const items = (str||"").split(";").map(s=>s.trim()).filter(Boolean);
+  const arr=[];
+  for(const it of items){
+    const m = it.match(/^\s*([0-9]+)\s*@\s*([0-9]*\.?[0-9]+)\s*$/);
+    if(m){ arr.push({g:Number(m[1]), Te_cm1:Number(m[2])}); }
+  }
+  return arr;
+}
+function prefillElList(){
+  const key=molSel.value, mol=molecules[key];
+  // Suggest only the excited entries (ground is always included internally)
+  if(key==="O2"){
+    elList.placeholder="2@7882; 1@13120";
+    elList.value = "2@7882; 1@13120";
+    incEl.checked=false; // default off to match legacy totals
+  }else{
+    elList.placeholder="(none)";
+    elList.value="";
+    incEl.checked=false;
+  }
+}
 
 function computeAndRender(){
   const key=molSel.value;
@@ -333,15 +378,17 @@ function computeAndRender(){
     tbody.innerHTML='<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
     return;
   }
+  const includeExcited = !!incEl.checked;
+  const userStates = includeExcited ? parseElList(elList.value) : [];
 
-  const r=thermoRRHO(mol,T);
+  const r=thermoRRHO(mol,T, includeExcited, userStates);
   const rows=[
     ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
     ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
     ["S",             format(r.S ), "J/(mol·K)"],
     ["U",             format(r.U/1000,3), "kJ/mol"],
     ["H",             format(r.H/1000,3), "kJ/mol"],
-    ["G",             format(r.G/1000,3), "kJ/mol"]  // <-- fixed
+    ["G",             format(r.G/1000,3), "kJ/mol"]
   ];
   tbody.innerHTML=rows.map(([k,v,u])=>`<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`).join("");
 }
@@ -349,4 +396,5 @@ function computeAndRender(){
 
 </body>
 </html>
+
 
