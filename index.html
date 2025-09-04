@@ -48,12 +48,6 @@
   footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
   .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;width:1px;overflow:hidden;white-space:nowrap}
 
-  /* Electronic options block */
-  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
-  .opts small{color:var(--muted)}
-  .opts .row2{display:grid;grid-template-columns: auto 1fr;gap:10px;align-items:center}
-  .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:6px}
-
   @media (max-width:960px){ .hero{grid-template-columns:1fr} }
 </style>
 </head>
@@ -106,15 +100,6 @@
         <button class="btn btn-primary" id="calc" type="button">Calculate</button>
       </div>
 
-      <!-- Electronic options -->
-      <div class="mini opts" aria-label="Electronic state options">
-        <div class="row2">
-          <label><input type="checkbox" id="incEl"> Include excited electronic states</label>
-          <input id="elList" placeholder="g@Te_cm1; g@Te_cm1 …  (e.g., 2@7882; 1@13120)" aria-label="Electronic states list">
-        </div>
-        <small>Always includes the ground state. Format: <code>g@Te</code> in cm⁻¹; separate with <code>;</code>. <span class="badge">Tip</span> O₂: <code>2@7882; 1@13120</code> (a¹Δ<sub>g</sub>, b¹Σ<sub>g</sub><sup>+</sup>).</small>
-      </div>
-
       <div class="mini" role="region" aria-label="Results">
         <table>
           <thead>
@@ -124,7 +109,7 @@
         </table>
       </div>
 
-      <p class="kicker">RRHO ideal-gas model (p° = 101 325 Pa). <b>Electronic option</b> adds low-lying excited states into U, S, C<sub>v</sub>, C<sub>p</sub>.</p>
+      <p class="kicker">RRHO ideal-gas model (p° = 101 325 Pa). Electronic contribution uses ground-state degeneracy only.</p>
     </aside>
   </section>
 
@@ -146,7 +131,7 @@ const PI = Math.PI;
 const P_STD = 1.01325e5;       // Pa (101 325)
 
 /* ===== Helpers ===== */
-function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }               // cm^-1 -> K
+function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; } // cm^-1 -> K
 function thetasVib(arr){ return arr.map(thetaFromCm1); }
 function thetasRotLinear(B){ return thetaFromCm1(B); }
 function thetasRotNonlinear(A,B,C){ return [thetaFromCm1(A),thetaFromCm1(B),thetaFromCm1(C)]; }
@@ -187,27 +172,16 @@ function S_trans(T,p,M){
   return R*(Math.log(factor)+2.5);
 }
 
-/* ===== Electronic states (multi-state support) ===== */
-function electronicContrib(T, states){
-  // states: [{g, Te_cm1}] including ground (Te_cm1=0)
-  if(!states || states.length===0) return {U:0,Cv:0,S:0};
-  let Z=0, M1=0, M2=0, Tpos=clampPos(T);
-  for(const s of states){
-    const E = thetaFromCm1(Number(s.Te_cm1)||0);
-    const g = Number(s.g)||0;
-    const w = g * Math.exp(-E/Tpos);
-    Z += w; M1 += E*w; M2 += E*E*w;
-  }
-  if(Z<=0) return {U:0,Cv:0,S:0};
-  const Ebar = M1/Z, varE = Math.max(0, M2/Z - Ebar*Ebar);
-  const U = R*Ebar, Cv = R*(varE/(Tpos*Tpos)), S = R*Math.log(Z) + U/Tpos;
-  return {U,Cv,S};
+/* ===== Electronic (ground only) ===== */
+function electronicGroundOnly(T, g0=1){
+  const Z = Math.max(g0,1e-300); // avoid log(0)
+  const S = R*Math.log(Z);       // U≈0, Cv≈0 for ground only
+  return {U:0, Cv:0, S};
 }
 
 /* ===== Rotation (linear, exact sum with adaptive cap) ===== */
 function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=null){
   const Tpos=clampPos(T), th=clampPos(theta_r);
-  // Adaptive Jcap: ~5.25*sqrt(T/theta_r) + margin covers 1e-12 tail well
   const autoCap = Math.max(40, Math.ceil(5.25*Math.sqrt(Tpos/th)+20));
   const CAP = (Jcap==null)? autoCap : Jcap;
 
@@ -271,7 +245,7 @@ function rotNonlinearExact(T,sigma,thetaA,thetaB,thetaC,relTol=1e-12,Jcap=120,ne
 }
 
 /* ===== Master aggregator ===== */
-function thermoRRHO(mol,T, includeExcited=false, userExcitedStates=[]){
+function thermoRRHO(mol,T){
   const theta_v=thetasVib(mol.vib_cm1||[]);
   const Uv=U_vib(T,theta_v), Cvv=Cv_vib(T,theta_v), Sv=S_vib(T,theta_v);
 
@@ -286,14 +260,9 @@ function thermoRRHO(mol,T, includeExcited=false, userExcitedStates=[]){
     ({U:Ur,Cv:Cvr,S:Sr}=rotNonlinearExact(T,mol.sigma,tA,tB,tC));
   }
 
-  // Build electronic states: always include the ground state(s),
-  // append defaults for this molecule (if requested), then append user list.
-  let states = mol.electronic_base ? mol.electronic_base.slice() : (mol.electronic || [{g:1,Te_cm1:0}]).slice();
-  if(includeExcited){
-    if(mol.electronic_excited) states = states.concat(mol.electronic_excited);
-    if(Array.isArray(userExcitedStates) && userExcitedStates.length) states = states.concat(userExcitedStates);
-  }
-  const {U:Uel,Cv:Cvel,S:Sel} = electronicContrib(T, states);
+  // Electronic: ground only
+  const g0 = (mol.electronic_base && mol.electronic_base[0] && mol.electronic_base[0].g) ? mol.electronic_base[0].g : 1;
+  const {U:Uel,Cv:Cvel,S:Sel} = electronicGroundOnly(T,g0);
 
   const U = Ut + Ur + Uv + Uel;       // J/mol
   const Cv = Cvt + Cvr + Cvv + Cvel;  // J/(mol·K)
@@ -305,70 +274,32 @@ function thermoRRHO(mol,T, includeExcited=false, userExcitedStates=[]){
   return {Cp,Cv,S,U,H,G};
 }
 
-/* ===== Default dataset (ground + optional excited lists) ===== */
+/* ===== Dataset (ground-state only) ===== */
 const molecules={
   CO:{ name:"CO", kind:"linear", M_kg_per_mol:0.02801, sigma:1, Brot_cm1:1.92253,
-      vib_cm1:[2143],
-      electronic_base:[{g:1,Te_cm1:0}],
-      electronic_excited:[] },
+      vib_cm1:[2143], electronic_base:[{g:1,Te_cm1:0}] },
   O2:{ name:"O2", kind:"linear", M_kg_per_mol:0.031999, sigma:2, Brot_cm1:1.43768,
-      vib_cm1:[1556],
-      electronic_base:[{g:3,Te_cm1:0}],
-      // Two low-lying singlets; edit if you have better term energies.
-      electronic_excited:[{g:2,Te_cm1:7882},{g:1,Te_cm1:13120}] },
+      vib_cm1:[1556], electronic_base:[{g:3,Te_cm1:0}] },
   CH4:{ name:"CH4", kind:"nonlinear", M_kg_per_mol:0.016042, sigma:12,
       A_cm1:5.2412, B_cm1:5.2412, C_cm1:5.2412,
       vib_cm1:[2917,1534,1534,3019,3019,3019,1306,1306,1306],
-      electronic_base:[{g:1,Te_cm1:0}], electronic_excited:[] },
+      electronic_base:[{g:1,Te_cm1:0}] },
   NH3:{ name:"NH3", kind:"nonlinear", M_kg_per_mol:0.0170306, sigma:3,
       A_cm1:9.4443, B_cm1:9.4443, C_cm1:6.196,
       vib_cm1:[3337,950,3444,1627],
-      electronic_base:[{g:1,Te_cm1:0}], electronic_excited:[] }
+      electronic_base:[{g:1,Te_cm1:0}] }
 };
 
 /* ===== UI wiring ===== */
 document.getElementById('yr').textContent=new Date().getFullYear();
 const molSel=document.getElementById('mol'),
       tempEl=document.getElementById('temp'),
-      tbody=document.getElementById('tbody'),
-      incEl=document.getElementById('incEl'),
-      elList=document.getElementById('elList');
+      tbody=document.getElementById('tbody');
 
 document.getElementById('calc').addEventListener('click', computeAndRender);
-window.addEventListener('DOMContentLoaded', () => {
-  prefillElList();
-  computeAndRender();
-});
-molSel.addEventListener('change', () => { prefillElList(); computeAndRender(); });
-incEl.addEventListener('change', computeAndRender);
-elList.addEventListener('input', debounce(computeAndRender, 200));
+window.addEventListener('DOMContentLoaded', computeAndRender);
 
 function format(n,d=3){ return Number(n).toFixed(d); }
-function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
-
-/* Parse "g@Te; g@Te; ..." into [{g,Te_cm1}] */
-function parseElList(str){
-  const items = (str||"").split(";").map(s=>s.trim()).filter(Boolean);
-  const arr=[];
-  for(const it of items){
-    const m = it.match(/^\s*([0-9]+)\s*@\s*([0-9]*\.?[0-9]+)\s*$/);
-    if(m){ arr.push({g:Number(m[1]), Te_cm1:Number(m[2])}); }
-  }
-  return arr;
-}
-function prefillElList(){
-  const key=molSel.value, mol=molecules[key];
-  // Suggest only the excited entries (ground is always included internally)
-  if(key==="O2"){
-    elList.placeholder="2@7882; 1@13120";
-    elList.value = "2@7882; 1@13120";
-    incEl.checked=false; // default off to match legacy totals
-  }else{
-    elList.placeholder="(none)";
-    elList.value="";
-    incEl.checked=false;
-  }
-}
 
 function computeAndRender(){
   const key=molSel.value;
@@ -378,10 +309,7 @@ function computeAndRender(){
     tbody.innerHTML='<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
     return;
   }
-  const includeExcited = !!incEl.checked;
-  const userStates = includeExcited ? parseElList(elList.value) : [];
-
-  const r=thermoRRHO(mol,T, includeExcited, userStates);
+  const r=thermoRRHO(mol,T);
   const rows=[
     ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
     ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
@@ -396,5 +324,3 @@ function computeAndRender(){
 
 </body>
 </html>
-
-
