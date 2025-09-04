@@ -109,7 +109,7 @@
         </table>
       </div>
 
-      <p class="kicker">RRHO ideal gas: exact rotational J-sum, full electronic partition function, Sackur–Tetrode translation, harmonic-oscillator vibration (p° = 101 325 Pa).</p>
+      <p class="kicker">RRHO ideal gas: exact rotational J-sum, full electronic partition function, Sackur–Tetrode translation, harmonic-oscillator vibration (p° = 1 bar = 100 000 Pa).</p>
     </aside>
   </section>
 
@@ -128,7 +128,7 @@ const h  = 6.62607015e-34;     // J·s
 const c  = 299792458;          // m/s
 const NA = 6.02214076e23;      // 1/mol
 const PI = Math.PI;
-const P_STD = 1.00000e5;       // Pa (101 325)
+const P_STD = 1.00000e5;       // Pa (100 000)
 
 /* ===== Helpers ===== */
 function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }               // cm^-1 -> K
@@ -272,7 +272,6 @@ function thermoRRHO(mol,T){
     ({U:Ur,Cv:Cvr,S:Sr}=rotNonlinearExact(T,mol.sigma,tA,tB,tC));
   }
 
-  // Always use full electronic partition function (multi-state)
   const {U:Uel,Cv:Cvel,S:Sel}=electronicContrib(T, mol.electronic || [{g:1,Te_cm1:0}]);
 
   const U = Ut + Ur + Uv + Uel;       // J/mol
@@ -295,7 +294,6 @@ const molecules={
   
   O2:{ name:"O2", kind:"linear", M_kg_per_mol:0.031999, sigma:2, Brot_cm1:1.43768,
       vib_cm1:[1556],
-      // Ground X^3Σg− (g=3) + two low-lying singlets (approx term energies).
       electronic:[
         {g:3, Te_cm1:0},     
         {g:2, Te_cm1:7918.1},  
