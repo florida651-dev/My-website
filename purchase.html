@@ -21,6 +21,11 @@
   .nav a{color:var(--muted);margin-left:16px}
   .nav a:hover{color:var(--ink)}
 
+  .nav a[aria-current="page"]{
+  font-weight:800;
+  color:var(--ink-strong);
+}
+
   /* Hero */
   .hero{max-width:1040px;margin:28px auto 10px;padding:0 16px;display:grid;grid-template-columns:1fr;gap:28px}
   .hero h1{margin:.2rem 0 .4rem;font-size:clamp(28px,4.5vw,46px);line-height:1.15;color:var(--ink-strong)}
