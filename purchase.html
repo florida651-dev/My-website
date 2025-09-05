@@ -22,16 +22,9 @@
   .nav a:hover{color:var(--ink)}
 
   /* Hero */
-  .hero{
-    max-width:1040px;
-    margin:28px auto 10px;
-    padding:0 16px;
-    display:grid;
-    grid-template-columns:1fr; /* was 1.2fr .9fr */
-    gap:28px
-  }
+  .hero{max-width:1040px;margin:28px auto 10px;padding:0 16px;display:grid;grid-template-columns:1.2fr .9fr;gap:28px}
   .hero h1{margin:.2rem 0 .4rem;font-size:clamp(28px,4.5vw,46px);line-height:1.15;color:var(--ink-strong)}
-  .hero p{color:var(--muted);font-size:18px;max-width:80ch} /* was 62ch */
+  .hero p{color:var(--muted);font-size:18px;max-width:100ch}  /* wider paragraph */
   @media (max-width:960px){ .hero{grid-template-columns:1fr} }
 
   /* Card base (match homepage) */
@@ -84,7 +77,7 @@
   <section class="hero">
     <div>
       <h1>Get ThermoCalc CSVs</h1>
-      <p>Room-temperature benchmarks typically align within ~0.1–0.4% of CCCBDB at p° = 1&nbsp;bar. Linear rotors use the <b>exact J-sum</b>; non-linears use the <b>classical rigid-rotor</b>. Full electronic partition functions included.</p>
+      <p>Room-temperature benchmarks typically align within ~0.1–0.5% of CCCBDB at p° = 1&nbsp;bar. Linear rotors use the <b>exact J-sum</b>; non-linears use the <b>classical rigid-rotor</b>. Full electronic partition functions included.</p>
       <p class="kicker">CSV columns match the website: S, C<sub>p</sub>, C<sub>v</sub>, U, H, G vs. T (+ method &amp; reference state notes).</p>
     </div>
   </section>
@@ -101,11 +94,11 @@
         <ul>
           <li><i>✅</i> One molecule, one method (e.g., CO J-sum)</li>
           <li><i>📄</i> Adjustable parameters (e.g., T or p)</li>
-          <li><i>🧮</i> Full qₑₗ contributions included</li>
+          <li><i>🧮</i> Full q<sub>el</sub> contributions included</li>
           <li><i>🔬</i> Ready for homework, labs, and research notes</li>
         </ul>
         <a id="buy-single" class="btn btn-primary btn-block" href="#" rel="nofollow">Buy Single CSV</a>
-        <div class="tiny">Secure checkout via Stripe</div>
+        <div class="tiny">Instant download after payment</div>
       </div>
     </div>
 
@@ -113,13 +106,13 @@
     <div class="plan card" style="outline:2px solid rgba(37,99,235,.10)">
       <div class="hd">
         <div class="title">All CSV bundle <span class="badge">Best value</span></div>
-        <div class="price">$29<span class="per">one-time</span></div>
+        <div class="price">$29</div><span class="per">one-time</span></div>
       </div>
       <div class="bd">
         <ul>
           <li><i>📦</i> CO (J-sum), O₂ (J-sum), CH₄ (classical), H₂O (classical), NH₃ (classical)</li>
           <li><i>📄</i> Adjustable parameters (e.g., T or p)</li>
-          <li><i>🧮</i> Full qₑₗ contributions included</li>
+          <li><i>🧮</i> Full q<sub>el</sub> contributions included</li>
           <li><i>🔬</i> Ready for homework, labs, and research notes</li>
         </ul>
         <a id="buy-bundle" class="btn btn-primary btn-block" href="#" rel="nofollow">Buy All CSVs</a>
@@ -131,7 +124,7 @@
     <div class="plan card">
       <div class="hd">
         <div class="title">Custom molecule</div>
-        <div class="price">$29<span class="per">one-time</span></div>
+        <div class="price">$35<span class="per">one-time</span></div>
       </div>
       <div class="bd">
         <ul>
@@ -140,7 +133,9 @@
           <li><i>🔗</i> Delivery by private download link</li>
         </ul>
         <a id="buy-custom" class="btn btn-primary btn-block" href="#" rel="nofollow">Order Custom CSV</a>
-        <div class="tiny muted">One revision included for <b>customer-supplied parameter typos</b>; if we make a mistake, <b>corrections are free</b>. Have details handy: σ, rotational constants (cm⁻¹), vibrational fundamentals (cm⁻¹) with degeneracies, and electronic terms (g, Tₑ in cm⁻¹) if any.</div>
+        <div class="tiny muted">
+          One revision included for <b>customer-supplied parameter typos</b>; if <i>we</i> make a mistake, corrections are free. Have details handy: σ, rotational constants (cm⁻¹), vibrational fundamentals (cm⁻¹) with degeneracies, and electronic terms (g, T<sub>e</sub> in cm⁻¹) if any.
+        </div>
       </div>
     </div>
   </section>
@@ -150,17 +145,17 @@
     <div class="card pad">
       <h3>What’s included</h3>
       <ul class="list">
-        <li>CSV headers documenting method, p°, and units</li>
+        <li>CSV headers documenting method, constants, and units</li>
         <li>S, C<sub>p</sub>, C<sub>v</sub>, U, H, G vs. T (molar)</li>
         <li>Electronic degeneracies &amp; term energies accounted for</li>
       </ul>
-      <p class="note">Non-linear rotors use the classical rigid-rotor formula; linear rotors use an exact J-sum. Translation uses Sackur–Tetrode; vibrations are harmonic; p° = 1 bar.</p>
+      <p class="note">Non-linear rotors use the classical rigid-rotor formula; linear rotors use an exact J-sum. Translation uses Sackur–Tetrode; vibrations are harmonic.</p>
     </div>
     <div class="card pad">
       <h3>How delivery works</h3>
       <ul class="list">
         <li><b>Single / Bundle:</b> Stripe redirects to your download page with your files.</li>
-        <li><b>Custom:</b> After checkout, you’ll submit a short form. We email a private link when ready (<b>one revision included for customer-supplied parameter typos; our mistakes are fixed free</b>).</li>
+        <li><b>Custom:</b> After checkout, you’ll submit a short form. We email a private link when ready.</li>
         <li>Links can be time-limited for security; keep your files locally.</li>
       </ul>
       <p class="note">Need a receipt or refund? Use the Stripe receipt or reply to your order email.</p>
@@ -174,16 +169,18 @@
 
 <script>
   // === Paste your Stripe Payment Links here ===
+  // Replace the placeholders with your live Payment Link URLs.
   const STRIPE_SINGLE = "https://buy.stripe.com/your_single_csv";
   const STRIPE_BUNDLE = "https://buy.stripe.com/your_all_csv_bundle";
   const STRIPE_CUSTOM = "https://buy.stripe.com/your_custom_molecule";
 
+  // Apply links to buttons
   document.getElementById('buy-single').href = STRIPE_SINGLE;
   document.getElementById('buy-bundle').href = STRIPE_BUNDLE;
   document.getElementById('buy-custom').href = STRIPE_CUSTOM;
 
+  // Footer year
   document.getElementById('yr').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
-
