@@ -53,6 +53,20 @@
   .muted{color:var(--muted)}
   .tiny{font-size:12px;color:var(--muted);margin-top:8px}
 
+  /* Prevent price label wrapping/splitting */
+  .plan .hd .price{
+    display:flex;
+    align-items:baseline;
+    gap:4px;
+    white-space:nowrap;
+    flex:0 0 auto;
+  }
+  .plan .hd .price .per{
+    white-space:nowrap;
+    word-break:keep-all;
+    overflow-wrap:normal;
+  }
+
   /* Info sections */
   .info{max-width:1040px;margin:18px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media (max-width:960px){ .info{grid-template-columns:1fr} }
@@ -88,7 +102,7 @@
     <div class="plan card">
       <div class="hd">
         <div class="title">Single CSV</div>
-        <div class="price">$9<span class="per">one-time</span></div>
+        <div class="price">$9<span class="per">one&#8209;time</span></div>
       </div>
       <div class="bd">
         <ul>
@@ -106,8 +120,7 @@
     <div class="plan card" style="outline:2px solid rgba(37,99,235,.10)">
       <div class="hd">
         <div class="title">All CSV bundle <span class="badge">Best value</span></div>
-<div class="price">$29<span class="per">one&#8209;time</span></div>
-
+        <div class="price">$29<span class="per">one&#8209;time</span></div>
       </div>
       <div class="bd">
         <ul>
@@ -125,7 +138,7 @@
     <div class="plan card">
       <div class="hd">
         <div class="title">Custom molecule</div>
-        <div class="price">$35<span class="per">one-time</span></div>
+        <div class="price">$35<span class="per">one&#8209;time</span></div>
       </div>
       <div class="bd">
         <ul>
