@@ -18,6 +18,12 @@
   .nav a{color:var(--muted);margin-left:16px}
   .nav a:hover{color:var(--ink)}
 
+  /* Bold the current page in the top-right nav */
+.nav a[aria-current="page"]{
+  font-weight: 800;
+  color: var(--ink-strong);
+}
+
   .hero{max-width:1040px;margin:32px auto;padding:0 16px;display:grid;grid-template-columns:1.2fr .9fr;gap:28px}
   .hero h1{margin:.2rem 0 .4rem;font-size:clamp(28px,4.5vw,46px);line-height:1.15;color:var(--ink-strong)}
   .hero p{color:var(--muted);font-size:18px;max-width:62ch}
@@ -62,6 +68,16 @@
     </nav>
   </header>
 
+<header>
+  <div class="brand">ThermoCalc Web</div>
+  <nav class="nav">
+    <a href="/" aria-current="page">Home</a>
+    <a href="/methods.html">Methods &amp; Validation</a>
+    <a href="/purchase.html">Purchase</a>
+  </nav>
+</header>
+
+  
   <section class="hero">
     <div>
       <h1>Accurate Thermodynamic Data in Seconds — No Installation Required</h1>
