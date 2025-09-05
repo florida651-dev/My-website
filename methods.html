@@ -42,6 +42,11 @@
   tfoot td{font-weight:700}
   .center{text-align:center!important}
 
+  /* Validation table tidy-up (equal width + centered) */
+  table.validation{table-layout:fixed} /* equal column widths */
+  table.validation th, table.validation td{ text-align:center } /* center everything */
+  table.validation th:first-child, table.validation td:first-child{ text-align:center } /* override global left rule */
+
   /* Badges / hints */
   .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px}
   .hint{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;border-radius:12px;padding:10px 12px;font-size:14px}
@@ -67,41 +72,44 @@
     <p class="kicker">RRHO ideal-gas model with full electronic partition functions. Linear rotors use an exact J-sum; non-linear rotors use the classical rigid-rotor formula. This page explains <i>what</i> is computed and <i>why</i> it’s accurate—implementation details are intentionally brief.</p>
 
     <div class="cols">
+      <!-- LEFT COLUMN -->
       <div>
-    <h3>Partition functions</h3>
+        <h3>Partition functions</h3>
 
-<div class="eq" aria-label="Translational partition function (molar)">
-  <b>Translation (molar):</b><br>
-  <span class="mono">
-    q<sub>trans</sub> = ((2&pi; m k<sub>B</sub> T)/h<sup>2</sup>)<sup>3/2</sup> &middot; (k<sub>B</sub> T / p)
-  </span><br>
-</div>
+        <div class="eq" aria-label="Translational partition function (molar)">
+          <b>Translation (molar):</b><br>
+          <span class="mono">
+            q<sub>trans</sub> = ((2&pi; m k<sub>B</sub> T)/h<sup>2</sup>)<sup>3/2</sup> &middot; (k<sub>B</sub> T / p)
+          </span><br>
+        </div>
 
-<div class="eq" aria-label="Linear rotational partition function">
-  <b>Linear rotation (exact J-sum):</b><br>
-  <span class="mono">E<sub>J</sub>/k<sub>B</sub> = &theta;<sub>r</sub> J(J+1), g = (2J+1)</span><br>
-  <span class="mono">q<sub>rot</sub> = (1/&sigma;) &middot; &Sigma;<sub>J=0..&infin;</sub> g &middot; e<sup>&minus;E<sub>J</sub>/(k<sub>B</sub>T)</sup></span>
-</div>
+        <div class="eq" aria-label="Linear rotational partition function">
+          <b>Linear rotation (exact J-sum):</b><br>
+          <span class="mono">E<sub>J</sub>/k<sub>B</sub> = &theta;<sub>r</sub> J(J+1), g = (2J+1)</span><br>
+          <span class="mono">q<sub>rot</sub> = (1/&sigma;) &middot; &Sigma;<sub>J=0..&infin;</sub> g &middot; e<sup>&minus;E<sub>J</sub>/(k<sub>B</sub>T)</sup></span>
+        </div>
 
-<div class="eq" aria-label="Nonlinear rotational partition function (classical)">
-  <b>Non-linear rotation (classical rigid-rotor):</b><br>
-  <span class="mono">
-    q<sub>rot</sub> = (&radic;&pi;/&sigma;) &middot; T<sup>3/2</sup> / &radic;( &theta;<sub>A</sub> &theta;<sub>B</sub> &theta;<sub>C</sub> )
-  </span><br>
-</div>
+        <div class="eq" aria-label="Nonlinear rotational partition function (classical)">
+          <b>Non-linear rotation (classical rigid-rotor):</b><br>
+          <span class="mono">
+            q<sub>rot</sub> = (&radic;&pi;/&sigma;) &middot; T<sup>3/2</sup> / &radic;( &theta;<sub>A</sub> &theta;<sub>B</sub> &theta;<sub>C</sub> )
+          </span><br>
+        </div>
 
-<div class="eq" aria-label="Vibrational partition function">
-  <b>Vibration (harmonic, per mode i):</b><br>
-  <span class="mono">q<sub>vib,i</sub> = 1 / (1 &minus; e<sup>&minus;&theta;<sub>i</sub>/T</sup>)</span>
-</div>
+        <div class="eq" aria-label="Vibrational partition function">
+          <b>Vibration (harmonic, per mode i):</b><br>
+          <span class="mono">q<sub>vib,i</sub> = 1 / (1 &minus; e<sup>&minus;&theta;<sub>i</sub>/T</sup>)</span>
+        </div>
 
-<div class="eq" aria-label="Electronic partition function">
-  <b>Electronic (full multi-state):</b><br>
-  <span class="mono">q<sub>el</sub> = &Sigma;<sub>j</sub> g<sub>j</sub> e<sup>&minus;&theta;<sub>j</sub>/T</sup></span> &nbsp; (&theta;<sub>0</sub>=0 for ground state)
-</div>
+        <div class="eq" aria-label="Electronic partition function">
+          <b>Electronic (full multi-state):</b><br>
+          <span class="mono">q<sub>el</sub> = &Sigma;<sub>j</sub> g<sub>j</sub> e<sup>&minus;&theta;<sub>j</sub>/T</sup></span> &nbsp; (&theta;<sub>0</sub>=0 for ground state)
+        </div>
 
-<p class="note">Notation: &theta;<sub>i</sub> &equiv; h&nu;<sub>i</sub>/k<sub>B</sub> (vibrational temperatures); &theta;<sub>A,B,C</sub> are rotational temperatures from A,B,C (cm<sup>&minus;1</sup>). Symmetry (&sigma;) is applied where appropriate.</p>
-<div>
+        <p class="note">Notation: &theta;<sub>i</sub> &equiv; h&nu;<sub>i</sub>/k<sub>B</sub> (vibrational temperatures); &theta;<sub>A,B,C</sub> are rotational temperatures from A,B,C (cm<sup>&minus;1</sup>). Symmetry (&sigma;) is applied where appropriate.</p>
+      </div>
+
+      <!-- RIGHT COLUMN -->
       <div>
         <h3>Thermodynamic relations</h3>
         <div class="eq" aria-label="Thermodynamic identities">
@@ -155,7 +163,17 @@
     <p class="kicker">Comparison of ThermoCalc vs. CCCBDB at p° = 1&nbsp;bar. Δ = (ThermoCalc − CCCBDB). Typical agreement is within ~0.1–0.3% for these species under RRHO.</p>
 
     <div style="overflow:auto">
-      <table aria-label="Validation table at 298.15 K">
+      <table class="validation" aria-label="Validation table at 298.15 K">
+        <!-- equal column widths -->
+        <colgroup>
+          <col style="width:14.285%">
+          <col style="width:14.285%">
+          <col style="width:14.285%">
+          <col style="width:14.285%">
+          <col style="width:14.285%">
+          <col style="width:14.285%">
+          <col style="width:14.285%">
+        </colgroup>
         <thead>
           <tr>
             <th rowspan="2">Compound</th>
@@ -212,8 +230,8 @@
   </footer>
 
 <script>
-  // footer year (match homepage)
   document.getElementById('yr').textContent=new Date().getFullYear();
 </script>
 </body>
 </html>
+
