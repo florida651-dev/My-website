@@ -15,23 +15,35 @@
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
   a{color:var(--accent);text-decoration:none}
-  header{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:24px auto;padding:0 16px}
-  .brand{font-weight:800;letter-spacing:.2px}
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    max-width:1040px;
+    margin:24px auto;
+    padding:0 16px;
+  }
+
+  /* ✅ Fixed logo alignment */
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:800;
+    letter-spacing:.2px;
+    line-height:1;
+  }
+  .brand-logo{
+    height:28px;
+    width:28px;
+    display:block;
+    border-radius:6px;
+    flex:0 0 auto;
+  }
+
   .nav a{color:var(--muted);margin-left:16px}
   .nav a:hover{color:var(--ink)}
-.brand {
-  display: flex;
-  align-items: center;
-  font-weight: 800;
-  letter-spacing: .2px;
-}
-
-.brand-logo {
-  height: 28px;   /* adjust size as needed */
-  width: 28px;
-  margin-right: 8px;
-  border-radius: 6px; /* optional, keeps it neat */
-}
 
   /* Bold the current page in the top-right nav */
 .nav a[aria-current="page"]{
