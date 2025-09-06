@@ -168,85 +168,69 @@
 </script>
 
 <script>
-/* ===== Physical constants ===== */
-const R  = 8.31446261815324, kB = 1.380649e-23, h  = 6.62607015e-34, c  = 299792458, NA = 6.02214076e23, PI = Math.PI, P_STD = 1e5;
-/* Helpers */
-function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }
-function thetasVib(arr){ return arr.map(thetaFromCm1); }
-function thetasRotLinear(B){ return thetaFromCm1(B); }
-function thetasRotNonlinear(A,B,C){ return [thetaFromCm1(A),thetaFromCm1(B),thetaFromCm1(C)]; }
-function clampPos(x){ return Math.max(x,1e-12); }
-/* Vibrations */
-function U_vib(T, th){ let s=0,Tp=clampPos(T); for(const t of th){ const x=t/Tp, ex=Math.exp(x); s += t/(ex-1);} return R*s; }
-function Cv_vib(T, th){ let s=0,Tp=clampPos(T); for(const t of th){ const x=t/Tp, ex=Math.exp(x), d=ex-1; s += x*x*(ex/(d*d)); } return R*s; }
-function S_vib(T, th){ let s=0,Tp=clampPos(T); for(const t of th){ const x=t/Tp, ex=Math.exp(x); s += (x/(ex-1)) - Math.log(1-Math.exp(-x)); } return R*s; }
-/* Translation (molar) */
-function U_trans(T){ return 1.5*R*T; }
-function Cv_trans(){ return 1.5*R; }
-function S_trans(T,p,M){ const m=M/NA; const f=Math.pow((2*PI*m*kB*T)/(h*h),1.5) * (kB*T/p); return R*(Math.log(f)+2.5); }
-/* Electronic */
-function electronicContrib(T, states){
-  let Z=0,M1=0,M2=0,Tp=clampPos(T);
-  for(const s of (states||[])){ const E=thetaFromCm1(+s.Te_cm1||0), g=+s.g||0, w=g*Math.exp(-E/Tp); Z+=w; M1+=E*w; M2+=E*E*w; }
-  if(Z<=0) return {U:0,Cv:0,S:0};
-  const Ebar=M1/Z, varE=Math.max(0, M2/Z - Ebar*Ebar);
-  const U=R*Ebar, Cv=R*(varE/(Tp*Tp)), S=R*Math.log(Z)+U/Tp; return {U,Cv,S};
-}
-/* Rotation (linear exact) */
-function rotLinearExact(T,sigma,theta_r,relTol=1e-12,Jcap=null){
-  const Tp=clampPos(T), th=clampPos(theta_r);
-  const CAP=(Jcap==null)? Math.max(40, Math.ceil(5.25*Math.sqrt(Tp/th)+20)) : Jcap;
-  let Z=0,M1=0,M2=0;
-  for(let J=0; J<=CAP; J++){
-    const JJ1=J*(J+1), g=(2*J+1), E=th*JJ1, w=g*Math.exp(-E/Tp);
-    Z+=w; M1+=E*w; M2+=E*E*w; if(w<relTol*Math.max(Z,1)&&J>5) break;
+  // === CONFIG: where is your API? ===
+  // During local testing (uvicorn on your laptop):
+  const LOCAL_API = "http://127.0.0.1:8000/api/calc";
+  // After you deploy (e.g., Render custom domain):
+  const PROD_API  = "https://YOUR-API-DOMAIN.example.com/api/calc"; // <-- change later
+
+  // Pick URL based on where the page is running:
+  const API_URL = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+    ? LOCAL_API
+    : PROD_API;
+
+  const molSel = document.getElementById("mol");
+  const tempEl = document.getElementById("temp");
+  const tbody  = document.getElementById("tbody");
+
+  function format(n, d=3){ return Number(n).toFixed(d); }
+
+  async function computeAndRender(){
+    const molecule = molSel.value;
+    const T = parseFloat(tempEl.value);
+
+    if(!(T > 0)){
+      tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
+
+    try{
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ molecule, temperatureK: T })
+      });
+
+      if(!res.ok){
+        let msg = res.statusText;
+        try{ const j = await res.json(); if(j.detail) msg = j.detail; } catch {}
+        throw new Error(msg || ("HTTP " + res.status));
+      }
+
+      const r = await res.json(); // {Cp,Cv,S,U,H,G}
+
+      const rows = [
+        ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
+        ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
+        ["S",             format(r.S),  "J/(mol·K)"],
+        ["U",             format(r.U/1000, 3), "kJ/mol"],
+        ["H",             format(r.H/1000, 3), "kJ/mol"],
+        ["G",             format(r.G/1000, 3), "kJ/mol"]
+      ];
+      tbody.innerHTML = rows.map(([k,v,u]) =>
+        `<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`
+      ).join("");
+
+    }catch(e){
+      tbody.innerHTML = `<tr><td colspan="3">Error: ${e.message}</td></tr>`;
+    }
   }
-  const lnq=Math.log(Z/sigma), Ebar=M1/Z, varE=Math.max(0, M2/Z - Ebar*Ebar);
-  return { U:R*Ebar, Cv:R*(varE/(Tp*Tp)), S:R*lnq + (R*Ebar)/Tp };
-}
-/* Rotation (nonlinear classical) */
-function rotNonlinearClassical(T, sigma, tA, tB, tC){
-  const Tp=clampPos(T);
-  const lnq = Math.log(Math.sqrt(Math.PI)/sigma) + 1.5*Math.log(Tp) - 0.5*Math.log(tA*tB*tC);
-  const U = 1.5*R*Tp, Cv = 1.5*R, S = R*(lnq + 1.5);
-  return {U,Cv,S};
-}
-/* Aggregator */
-function thermoRRHO(m,T){
-  const thetav=thetasVib(m.vib_cm1||[]), Uv=U_vib(T,thetav), Cvv=Cv_vib(T,thetav), Sv=S_vib(T,thetav);
-  const Ut=U_trans(T), Cvt=Cv_trans(), St=S_trans(T,P_STD,m.M_kg_per_mol);
-  let Ur=0, Cvr=0, Sr=0;
-  if(m.kind==="linear"){ const th=thetasRotLinear(m.Brot_cm1); ({U:Ur,Cv:Cvr,S:Sr}=rotLinearExact(T,m.sigma,th)); }
-  else{ const [tA,tB,tC]=thetasRotNonlinear(m.A_cm1,m.B_cm1,m.C_cm1); ({U:Ur,Cv:Cvr,S:Sr}=rotNonlinearClassical(T,m.sigma,tA,tB,tC)); }
-  const {U:Uel,Cv:Cvel,S:Sel}=electronicContrib(T, m.electronic || [{g:1,Te_cm1:0}]);
-  const U=Ut+Ur+Uv+Uel, Cv=Cvt+Cvr+Cvv+Cvel, Cp=Cv+R, S=St+Sr+Sv+Sel, H=U+R*T, G=H-T*S;
-  return {Cp,Cv,S,U,H,G};
-}
-/* Dataset */
-const molecules={
-  CO:{ name:"CO", kind:"linear", M_kg_per_mol:0.02801, sigma:1, Brot_cm1:1.92253, vib_cm1:[2143], electronic:[{g:1,Te_cm1:0}]},
-  O2:{ name:"O2", kind:"linear", M_kg_per_mol:0.031999, sigma:2, Brot_cm1:1.43768, vib_cm1:[1556],
-       electronic:[{g:3,Te_cm1:0},{g:2,Te_cm1:7918.1},{g:1,Te_cm1:13195.1},{g:1,Te_cm1:33057.3}]},
-  CH4:{ name:"CH4", kind:"nonlinear", M_kg_per_mol:0.016042, sigma:12, A_cm1:5.2412, B_cm1:5.2412, C_cm1:5.2412,
-        vib_cm1:[2917,1534,1534,3019,3019,3019,1306,1306,1306], electronic:[{g:1,Te_cm1:0},{g:1,Te_cm1:68730}]},
-  H2O:{ name:"H2O", kind:"nonlinear", M_kg_per_mol:0.01801528, sigma:2, A_cm1:27.8770, B_cm1:14.5120, C_cm1:9.2850,
-        vib_cm1:[3657,1595,3756], electronic:[{g:1,Te_cm1:0},{g:1,Te_cm1:53800}]},
-  NH3:{ name:"NH3", kind:"nonlinear", M_kg_per_mol:0.01703052, sigma:3, A_cm1:9.44430, B_cm1:9.44430, C_cm1:6.19600,
-        vib_cm1:[3337,950,3444,3444,1627,1627], electronic:[{g:1,Te_cm1:0},{g:1,Te_cm1:46136}]}
-};
-/* UI wiring */
-const molSel=document.getElementById('mol'), tempEl=document.getElementById('temp'), tbody=document.getElementById('tbody');
-function format(n,d=3){ return Number(n).toFixed(d); }
-function computeAndRender(){
-  const key=molSel.value, T=parseFloat(tempEl.value), mol=molecules[key];
-  if(!mol || !(T>0)){ tbody.innerHTML='<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>'; return; }
-  const r=thermoRRHO(mol,T);
-  const rows=[["C<sub>p</sub>",format(r.Cp),"J/(mol·K)"],["C<sub>v</sub>",format(r.Cv),"J/(mol·K)"],["S",format(r.S),"J/(mol·K)"],
-              ["U",format(r.U/1000,3),"kJ/mol"],["H",format(r.H/1000,3),"kJ/mol"],["G",format(r.G/1000,3),"kJ/mol"]];
-  tbody.innerHTML=rows.map(([k,v,u])=>`<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`).join("");
-}
-document.getElementById('calc').addEventListener('click', computeAndRender);
-window.addEventListener('DOMContentLoaded', computeAndRender);
+
+  document.getElementById("calc").addEventListener("click", computeAndRender);
+  window.addEventListener("DOMContentLoaded", computeAndRender);
 </script>
+
 </body>
 </html>
