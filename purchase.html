@@ -76,6 +76,16 @@
     .info h3{margin:.2rem 0 .6rem}
     .list{margin:.4rem 0 0 .9rem}
     .list li{margin:.2rem 0}
+/* Page-wide section card: matches Methods page .card */
+.page-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:0 8px 28px rgba(15,23,42,.08);
+  max-width:1040px;
+  margin:0 auto 24px;
+  padding:24px;
+}
 
     /* Footer */
     footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
@@ -183,18 +193,15 @@
   </div>
 </section>  <!-- ← close the info grid -->
 
-<!-- Contact strip -->
-<section class="wrap">
-  <div class="card pad contact">
-    <p class="msg">
-      <b>Questions</b> or a molecule you want added?
-      We’re happy to validate more species on request.
-    </p>
-    <span class="spacer"></span>
-    <a class="btn btn-outline" href="/methods.html">Methods</a>
-    <a class="btn btn-primary" href="mailto:info@thermocalc.site">info@thermocalc.site</a>
-  </div>
+<section class="page-card">
+  <p class="kicker">
+    Questions or a molecule you want added? Reach out via the
+    <a href="/purchase.html">Purchase</a> page or
+    <a href="mailto:info@thermocalc.site">info@thermocalc.site</a> —
+    we’re happy to validate more species on request.
+  </p>
 </section>
+
 
 <footer>
   <div>© <span id="yr"></span> ThermoCalc Web. All rights reserved.</div>
