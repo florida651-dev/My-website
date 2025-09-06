@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="/favicon.png">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#2563eb">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>ThermoCalc Web — Accurate Thermodynamic Data</title>
   <style>
@@ -76,7 +76,7 @@
 
 <header>
   <div class="brand">
-    <img src="/logo.png" alt="ThermoCalc logo" class="brand-logo" loading="lazy" width="28" height="28">
+    <img src="/logo.png" alt="ThermoCalc logo" class="brand-logo" width="28" height="28">
     ThermoCalc Web
   </div>
   <button id="menuBtn" aria-label="Toggle navigation">☰</button>
@@ -90,13 +90,13 @@
 <section class="hero">
   <div>
     <h1>Accurate Thermodynamic Data in Seconds — No Installation Required</h1>
-    <p>Explore various thermodynamic values for molecules like CH<sub>4</sub>, O<sub>2</sub>, CO, H<sub>2</sub>O, and NH<sub>3</sub>. Perfect for <b>students</b>, <b>educators</b>, and <b>researchers</b>.</p>
+    <p>Explore various thermodynamic values for molecules like CH<sub>4</sub>, O<sub>2</sub>, CO, H<sub>2</sub>O, and NH<sub>3</sub>.</p>
 
     <div class="points">
       <div class="point"><i>⚡</i><div><b>Instant Calculations</b><br><span class="kicker">Enter a molecule and temperature, get results immediately.</span></div></div>
       <div class="point"><i>✅</i><div><b>Validated Data</b><br><span class="kicker">Benchmarked against NIST CCCBDB.</span></div></div>
-      <div class="point"><i>📂</i><div><b>Export Ready</b><br><span class="kicker">Upgrade for <b>CSV/PDF export</b> for assignments or research.</span></div></div>
-      <div class="point"><i>🎓</i><div><b>Education Friendly</b><br><span class="kicker">Great for homework checks, lectures, or self-study.</span></div></div>
+      <div class="point"><i>📂</i><div><b>Export Ready</b><br><span class="kicker">Upgrade for CSV/PDF export.</span></div></div>
+      <div class="point"><i>🎓</i><div><b>Education Friendly</b><br><span class="kicker">Great for homework checks and lectures.</span></div></div>
     </div>
 
     <div class="cta">
@@ -120,7 +120,7 @@
 
       <div class="unit">
         <label class="visually-hidden" for="temp">Temperature</label>
-        <input id="temp" type="number" inputmode="numeric" min="0.000001" step="0.01" value="298.15" aria-label="Temperature (K)" />
+        <input id="temp" type="number" min="0.000001" step="0.01" value="298.15" aria-label="Temperature (K)">
         <input value="K" aria-label="Units K" disabled style="text-align:center;border:1px solid var(--line);border-radius:10px;background:#f8fafc;color:var(--muted)">
       </div>
 
@@ -135,8 +135,7 @@
     </div>
 
     <p class="kicker">
-      RRHO ideal gas: exact rotational J-sum for linear molecules; classical rigid-rotor for nonlinear molecules;
-      full electronic partition function; Sackur–Tetrode translation; harmonic-oscillator vibration (p° = 1 bar).
+      RRHO ideal gas; linear rotors: exact J-sum; nonlinear: classical rigid-rotor; full electronic partition function; Sackur–Tetrode translation; harmonic-oscillator vibration (p° = 1 bar).
     </p>
   </aside>
 </section>
@@ -153,8 +152,8 @@
   <div>Values computed from validated statistical thermodynamics models.</div>
 </footer>
 
+<!-- Small UI script -->
 <script>
-  // Mobile menu toggle
   (function(){
     const btn=document.getElementById('menuBtn');
     const nav=document.querySelector('nav.nav');
@@ -167,32 +166,29 @@
   document.getElementById('yr').textContent=new Date().getFullYear();
 </script>
 
+<!-- === Calculator client: calls your API (no formulas in browser) === -->
 <script>
-  // === CONFIG: where is your API? ===
-  // During local testing (uvicorn on your laptop):
-  const LOCAL_API = "http://127.0.0.1:8000/api/calc";
-  // After you deploy (e.g., Render custom domain):
-  const PROD_API  = "https://YOUR-API-DOMAIN.example.com/api/calc"; // <-- change later
+  // 1) Set these two:
+  const LOCAL_API = "http://127.0.0.1:8000/api/calc";              // when your API runs on your laptop
+  const PROD_API  = "https://YOUR-API-DOMAIN.example.com/api/calc"; // <- replace after you deploy
 
-  // Pick URL based on where the page is running:
-  const API_URL = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
-    ? LOCAL_API
-    : PROD_API;
+  // 2) During local testing you can force LOCAL_API by uncommenting:
+  // const API_URL = LOCAL_API;
+
+  // 3) When deployed, use this auto-switcher instead:
+  const API_URL = (typeof API_URL === "undefined")
+    ? ((location.hostname === "localhost" || location.hostname === "127.0.0.1") ? LOCAL_API : PROD_API)
+    : API_URL;
 
   const molSel = document.getElementById("mol");
   const tempEl = document.getElementById("temp");
   const tbody  = document.getElementById("tbody");
-
   function format(n, d=3){ return Number(n).toFixed(d); }
 
   async function computeAndRender(){
     const molecule = molSel.value;
     const T = parseFloat(tempEl.value);
-
-    if(!(T > 0)){
-      tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
-      return;
-    }
+    if(!(T > 0)){ tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>'; return; }
 
     tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
 
@@ -202,15 +198,12 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ molecule, temperatureK: T })
       });
-
       if(!res.ok){
         let msg = res.statusText;
         try{ const j = await res.json(); if(j.detail) msg = j.detail; } catch {}
         throw new Error(msg || ("HTTP " + res.status));
       }
-
       const r = await res.json(); // {Cp,Cv,S,U,H,G}
-
       const rows = [
         ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
         ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
@@ -222,7 +215,6 @@
       tbody.innerHTML = rows.map(([k,v,u]) =>
         `<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`
       ).join("");
-
     }catch(e){
       tbody.innerHTML = `<tr><td colspan="3">Error: ${e.message}</td></tr>`;
     }
