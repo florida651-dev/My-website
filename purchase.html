@@ -27,6 +27,19 @@
     .contact .msg{font-size:16px;color:var(--muted)}
     .contact .msg b{color:var(--ink-strong)}
     .contact .spacer{flex:1 1 auto;min-width:12px}
+    /* container (already used elsewhere) */
+.wrap{max-width:1040px;margin:18px auto;padding:0 16px}
+
+/* full-width card INSIDE the container */
+.page-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:0 8px 28px rgba(15,23,42,.08);
+  padding:24px;
+  /* no max-width / center here – the .wrap handles that */
+}
+
 
     /* Header / nav (match homepage) */
     header{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:24px auto;padding:0 16px}
@@ -193,14 +206,17 @@
   </div>
 </section>  <!-- ← close the info grid -->
 
-<section class="page-card">
-  <p class="kicker">
-    Questions or a molecule you want added? Reach out via the
-    <a href="/purchase.html">Purchase</a> page or
-    <a href="mailto:info@thermocalc.site">info@thermocalc.site</a> —
-    we’re happy to validate more species on request.
-  </p>
+<section class="wrap">
+  <div class="page-card">
+    <p class="kicker">
+      Questions or a molecule you want added? Reach out via the
+      <a href="/purchase.html">Purchase</a> page or
+      <a href="mailto:info@thermocalc.site">info@thermocalc.site</a> —
+      we’re happy to validate more species on request.
+    </p>
+  </div>
 </section>
+
 
 
 <footer>
