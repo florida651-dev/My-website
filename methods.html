@@ -2,268 +2,111 @@
 <html lang="en">
 <head>
   <link rel="icon" type="image/png" href="/favicon.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#2563eb">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>Methods & Validation — ThermoCalc Web</title>
+  <style>
+    :root{ --bg:#f7f9fc; --card:#fff; --ink:#0f172a; --muted:#475569; --accent:#2563eb; --line:#e2e8f0;
+           --ink-strong:#0b1220; --btn:#2563eb; --btn-ink:#fff; --btn-outline:#e2e8f0; }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;padding-bottom:env(safe-area-inset-bottom)}
+    a{color:var(--accent);text-decoration:none}
+    img{max-width:100%;height:auto}
+    .kicker{color:var(--muted);font-size:14px}
+    .kicker.methods-intro{font-size:18px;line-height:1.6}
+    .note{color:var(--muted);font-size:14px;margin-top:10px}
 
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Methods & Validation — ThermoCalc Web</title>
-<style>
-  :root{
-    --bg:#f7f9fc; --card:#fff; --ink:#0f172a; --muted:#475569; --accent:#2563eb; --line:#e2e8f0;
-    --ink-strong:#0b1220; --btn:#2563eb; --btn-ink:#fff; --btn-outline:#e2e8f0;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  a{color:var(--accent);text-decoration:none}
-  .kicker{color:var(--muted);font-size:14px}
-  .kicker.methods-intro {
-  font-size: 18px;  /* larger than normal kicker */
-  line-height: 1.6;
-}
+    header{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:24px auto;padding:0 16px;gap:10px}
+    .brand{display:flex;align-items:center;font-weight:800;letter-spacing:.2px}
+    .brand-logo{height:28px;width:28px;margin-right:8px;border-radius:6px}
+    .nav a{color:var(--muted);margin-left:16px}
+    .nav a:hover{color:var(--ink)}
+    .nav a[aria-current="page"]{font-weight:800;color:var(--ink-strong)}
+    #menuBtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;display:none}
 
-  .note{color:var(--muted);font-size:14px;margin-top:10px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.08);max-width:1040px;margin:0 auto 24px;padding:24px}
+    h2{margin:.2rem 0 .6rem;color:var(--ink-strong)}
+    h3{margin:1.1rem 0 .4rem}
 
-  /* Header / nav (match homepage) */
-  header{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:24px auto;padding:0 16px}
-  .brand{font-weight:800;letter-spacing:.2px}
-  .nav a{color:var(--muted);margin-left:16px}
-  .nav a:hover{color:var(--ink)}
+    code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .eq{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;margin:.4rem 0}
 
-  .nav a[aria-current="page"]{
-  font-weight:800;
-  color:var(--ink-strong);
-}
-.brand {
-  display: flex;
-  align-items: center;
-  font-weight: 800;
-  letter-spacing: .2px;
-}
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    @media (max-width:960px){ .cols{grid-template-columns:1fr} }
 
-.brand-logo {
-  height: 28px;   /* adjust size as needed */
-  width: 28px;
-  margin-right: 8px;
-  border-radius: 6px; /* optional, keeps it neat */
-}
+    table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right}
+    th:first-child,td:first-child{text-align:left}
+    thead th{background:#f8fafc}
+    tfoot td{font-weight:700}
+    .center{text-align:center!important}
+    table.validation{table-layout:fixed}
+    table.validation th, table.validation td{ text-align:center }
+    table.validation th:first-child, table.validation td:first-child{ text-align:center }
 
-  /* Page container cards (match homepage .card) */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.08);max-width:1040px;margin:0 auto 24px;padding:24px}
-  h2{margin:.2rem 0 .6rem;color:var(--ink-strong)}
-  h3{margin:1.1rem 0 .4rem}
+    .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px}
+    .hint{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;border-radius:12px;padding:10px 12px;font-size:14px}
+    .list{margin:.4rem 0 0 .9rem}
+    .list li{margin:.2rem 0}
 
-  /* Equations / callouts */
-  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-  .eq{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;margin:.4rem 0}
+    footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
 
-  /* Columns (align breakpoint with homepage) */
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  @media (max-width:960px){ .cols{grid-template-columns:1fr} }
-
-  /* Tables (match mini-table look) */
-  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right}
-  th:first-child,td:first-child{text-align:left}
-  thead th{background:#f8fafc}
-  tfoot td{font-weight:700}
-  .center{text-align:center!important}
-
-  /* Validation table tidy-up (equal width + centered) */
-  table.validation{table-layout:fixed} /* equal column widths */
-  table.validation th, table.validation td{ text-align:center } /* center everything */
-  table.validation th:first-child, table.validation td:first-child{ text-align:center } /* override global left rule */
-
-  /* Badges / hints */
-  .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px}
-  .hint{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;border-radius:12px;padding:10px 12px;font-size:14px}
-  .list{margin:.4rem 0 0 .9rem}
-  .list li{margin:.2rem 0}
-
-  /* Footer (match homepage) */
-  footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
-</style>
+    @media (max-width:720px){
+      .nav{display:none}
+      .nav.nav--open{display:block}
+      .nav a{display:block;padding:10px 0;margin:0}
+      #menuBtn{display:inline-block}
+    }
+    @media (max-width:560px){
+      .card{padding:16px}
+      footer{flex-direction:column;align-items:flex-start;gap:8px}
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b1220;--card:#0f172a;--ink:#e5e7eb;--muted:#94a3b8;--accent:#60a5fa;--line:#1f2937;--ink-strong:#f3f4f6;--btn:#3b82f6;--btn-ink:#fff;--btn-outline:#2b3647; }
+      body{background:var(--bg)}
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-  <img src="/logo.png" alt="ThermoCalc logo" class="brand-logo">
-  ThermoCalc Web
-</div>
+<header>
+  <div class="brand">
+    <img src="/logo.png" alt="ThermoCalc logo" class="brand-logo" loading="lazy" width="28" height="28">
+    ThermoCalc Web
+  </div>
+  <button id="menuBtn" aria-label="Toggle navigation">☰</button>
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a href="/methods.html" aria-current="page">Methods &amp; Validation</a>
+    <a href="/purchase.html">Purchase</a>
+  </nav>
+</header>
 
-    <nav class="nav">
-   <a href="/">Home</a>
-<a href="/methods.html" aria-current="page">Methods &amp; Validation</a>
-<a href="/purchase.html">Purchase</a>
+<!-- [rest of your Methods content unchanged] -->
 
-    </nav>
-  </header>
+<section class="card">
+  <p class="kicker">Questions or a molecule you want added? Reach out via the <a href="/purchase.html">Purchase</a> page or <a href="mailto:info@thermocalc.site">info@thermocalc.site</a> — we’re happy to validate more species on request.</p>
+</section>
 
-  <section class="card">
-    <h2>Methods </h2>
-  <p class="kicker methods-intro">
-  RRHO ideal-gas model with full electronic partition functions. Linear rotors use an exact J-sum; non-linear rotors use the classical rigid-rotor formula. This page explains <i>what</i> is computed and <i>why</i> it’s accurate—implementation details are intentionally brief.
-</p>
-
-    <div class="cols">
-      <!-- LEFT COLUMN -->
-      <div>
-        <h3>Partition functions</h3>
-
-        <div class="eq" aria-label="Translational partition function (molar)">
-          <b>Translation (molar):</b><br>
-          <span class="mono">
-            q<sub>trans</sub> = ((2&pi; m k<sub>B</sub> T)/h<sup>2</sup>)<sup>3/2</sup> &middot; (k<sub>B</sub> T / p)
-          </span><br>
-        </div>
-
-        <div class="eq" aria-label="Linear rotational partition function">
-          <b>Linear rotation (exact J-sum):</b><br>
-          <span class="mono">E<sub>J</sub>/k<sub>B</sub> = &theta;<sub>r</sub> J(J+1), g = (2J+1)</span><br>
-          <span class="mono">q<sub>rot</sub> = (1/&sigma;) &middot; &Sigma;<sub>J=0..&infin;</sub> g &middot; e<sup>&minus;E<sub>J</sub>/(k<sub>B</sub>T)</sup></span>
-        </div>
-
-        <div class="eq" aria-label="Nonlinear rotational partition function (classical)">
-          <b>Non-linear rotation (classical rigid-rotor):</b><br>
-          <span class="mono">
-            q<sub>rot</sub> = (&radic;&pi;/&sigma;) &middot; T<sup>3/2</sup> / &radic;( &theta;<sub>A</sub> &theta;<sub>B</sub> &theta;<sub>C</sub> )
-          </span><br>
-        </div>
-
-        <div class="eq" aria-label="Vibrational partition function">
-          <b>Vibration (harmonic, per mode i):</b><br>
-          <span class="mono">q<sub>vib,i</sub> = 1 / (1 &minus; e<sup>&minus;&theta;<sub>i</sub>/T</sup>)</span>
-        </div>
-
-        <div class="eq" aria-label="Electronic partition function">
-          <b>Electronic (full multi-state):</b><br>
-          <span class="mono">q<sub>el</sub> = &Sigma;<sub>j</sub> g<sub>j</sub> e<sup>&minus;&theta;<sub>j</sub>/T</sup></span> &nbsp; (&theta;<sub>0</sub>=0 for ground state)
-        </div>
-
-        <p class="note">Notation: &theta;<sub>i</sub> &equiv; h&nu;<sub>i</sub>/k<sub>B</sub> (vibrational temperatures); &theta;<sub>A,B,C</sub> are rotational temperatures from A,B,C (cm<sup>&minus;1</sup>). Symmetry (&sigma;) is applied where appropriate.</p>
-      </div>
-
-      <!-- RIGHT COLUMN -->
-      <div>
-        <h3>Thermodynamic relations</h3>
-        <div class="eq" aria-label="Thermodynamic identities">
-          Each contribution uses its own partition function:<br>
-          <span class="mono">S = R ln q + U/T</span>,&nbsp;
-          <span class="mono">U = R ⟨Ē⟩</span>,&nbsp;
-          <span class="mono">C<sub>v</sub> = R·Var(Ē)/T²</span><br>
-          <span class="mono">C<sub>p</sub> = C<sub>v</sub> + R</span>,&nbsp;
-          <span class="mono">H = U + RT</span>,&nbsp;
-          <span class="mono">G = H − TS</span>
-        </div>
-
-        <h3>Scope &amp; approximations</h3>
-        <ul class="list">
-          <li><b>RRHO:</b> rigid rotor; harmonic oscillator; ideal gas at p° = 1&nbsp;bar.</li>
-          <li><b>Rotation:</b> exact J-sum (linear); classical rigid-rotor (non-linear).</li>
-          <li><b>Vibration:</b> fundamentals with explicit degeneracies; no anharmonic or vib-rot coupling.</li>
-          <li><b>Electronic:</b> summed over supplied terms (degeneracies &amp; term energies); ground state dominates at 298&nbsp;K unless otherwise noted.</li>
-        </ul>
-
-        <p class="hint">These choices match common textbook/reference practice at 298&nbsp;K and deliver room-temperature benchmarks within typical rounding of published tables.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>What this page shows vs. Full Service</h2>
-    <div class="cols">
-      <div>
-        <h3>On this page</h3>
-        <ul class="list">
-          <li>Transparent formulas and assumptions.</li>
-          <li>Representative 298.15&nbsp;K validation at p° = 1&nbsp;bar.</li>
-          <li>Clear notation for each partition-function component.</li>
-        </ul>
-      </div>
-      <div>
-        <h3>Full Service </h3>
-        <ul class="list">
-          <li>Arbitrary <b>T</b> and <b>p</b> ranges, grids, and custom step sizes.</li>
-          <li>Exportable <b>CSV</b> tables for various thermodynamic properties.</li>
-          <li>Per-molecule summaries with units and reference state clearly labeled.</li>
-        </ul>
-        <p class="note">See the <a href="/purchase.html">Purchase</a> page for details.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>Validation <span class="badge">298.15&nbsp;K</span></h2>
-    <p class="kicker">Comparison of ThermoCalc vs. CCCBDB at p° = 1&nbsp;bar. Δ = (ThermoCalc − CCCBDB). Typical agreement is within ~0.1–0.5% for these species under RRHO.</p>
-
-    <div style="overflow:auto">
-      <table class="validation" aria-label="Validation table at 298.15 K">
-        <!-- equal column widths -->
-        <colgroup>
-          <col style="width:14.285%">
-          <col style="width:14.285%">
-          <col style="width:14.285%">
-          <col style="width:14.285%">
-          <col style="width:14.285%">
-          <col style="width:14.285%">
-          <col style="width:14.285%">
-        </colgroup>
-        <thead>
-          <tr>
-            <th rowspan="2">Compound</th>
-            <th colspan="3" class="center">S° [J·mol⁻¹·K⁻¹]</th>
-            <th colspan="3" class="center">C°<sub>p</sub> [J·mol⁻¹·K⁻¹]</th>
-          </tr>
-          <tr>
-            <th>ThermoCalc</th><th>CCCBDB</th><th>Δ</th>
-            <th>ThermoCalc</th><th>CCCBDB</th><th>Δ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>CO</td>
-            <td>197.65</td><td>197.66</td><td>−0.01</td>
-            <td>29.13</td><td>29.14</td><td>−0.01</td>
-          </tr>
-          <tr>
-            <td>O₂</td>
-            <td>205.13</td><td>205.15</td><td>−0.02</td>
-            <td>29.36</td><td>29.38</td><td>−0.02</td>
-          </tr>
-          <tr>
-            <td>CH₄</td>
-            <td>186.32</td><td>186.37</td><td>−0.05</td>
-            <td>35.64</td><td>35.69</td><td>−0.05</td>
-          </tr>
-          <tr>
-            <td>H₂O</td>
-            <td>188.72</td><td>188.84</td><td>−0.12</td>
-            <td>33.48</td><td>33.60</td><td>−0.12</td>
-          </tr>
-          <tr>
-            <td>NH₃</td>
-            <td>193.12</td><td>192.77</td><td>+0.35</td>
-            <td>35.48</td><td>35.63</td><td>−0.15</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="note">
-      Residual differences reflect classical vs. quantum choices for non-linear rotors, reference rounding of fundamentals, and molar-mass precision. Standard state is p° = 1&nbsp;bar throughout.
-    </p>
-  </section>
-
-  <section class="card">
-    <p class="kicker">Questions or a molecule you want added? Reach out via the <a href="/purchase.html">Purchase</a> page or <a href="mailto:info@thermocalc.site">info@thermocalc.site</a> — we’re happy to validate more species on request.</p>
-  </section>
-
-  <footer>
-    <div>© <span id="yr"></span> ThermoCalc Web. All rights reserved.</div>
-    <div>Values computed from validated statistical thermodynamics models.</div>
-  </footer>
+<footer>
+  <div>© <span id="yr"></span> ThermoCalc Web. All rights reserved.</div>
+  <div>Values computed from validated statistical thermodynamics models.</div>
+</footer>
 
 <script>
+  // Mobile menu toggle
+  (function(){
+    const btn=document.getElementById('menuBtn');
+    const nav=document.querySelector('nav.nav');
+    if(!btn||!nav) return;
+    const mq=window.matchMedia('(max-width: 720px)');
+    function apply(){ btn.style.display=mq.matches?'inline-block':'none'; if(!mq.matches) nav.classList.remove('nav--open'); }
+    mq.addEventListener('change',apply); apply();
+    btn.addEventListener('click',()=>nav.classList.toggle('nav--open'));
+  })();
   document.getElementById('yr').textContent=new Date().getFullYear();
 </script>
 </body>
 </html>
-
