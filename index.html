@@ -191,6 +191,7 @@
     if(!(T > 0)){ tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>'; return; }
 
     tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
+<script>const API_URL = "http://127.0.0.1:8000/api/calc";</script>
 
     try{
       const res = await fetch(API_URL, {
