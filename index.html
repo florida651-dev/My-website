@@ -43,6 +43,22 @@
     .calc input[type="number"]{text-align:right;font-variant-numeric:tabular-nums}
     .unit input[disabled]{width:56px;text-align:center;padding:8px}
 
+    /* Mobile-friendly molecule chips */
+    .mols{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+    .chip{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:999px;
+      padding:8px 12px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .chip[aria-pressed="true"]{
+      background:var(--btn);
+      color:var(--btn-ink);
+      border-color:var(--btn);
+    }
+
     select,input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
     .calc button{width:100%;margin:6px 0 12px}
     .mini{border:1px solid var(--line);border-radius:12px;padding:10px}
@@ -65,6 +81,9 @@
       .card.calc{padding:16px}
       .hero p{font-size:16px}
       footer{flex-direction:column;align-items:flex-start;gap:8px}
+      .row{grid-template-columns:1fr;}              /* stack inputs/button */
+      .mols{overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;}
+      .mols .chip{flex:0 0 auto;}
     }
     @media (prefers-color-scheme: dark){
       :root{ --bg:#0b1220;--card:#0f172a;--ink:#e5e7eb;--muted:#94a3b8;--accent:#60a5fa;--line:#1f2937;--ink-strong:#f3f4f6;--btn:#3b82f6;--btn-ink:#fff;--btn-outline:#2b3647; }
@@ -108,6 +127,16 @@
   <!-- Calculator -->
   <aside class="card calc" id="calculator" aria-label="Thermodynamic calculator">
     <h3>Thermodynamic Calculations</h3>
+
+    <!-- Quick picks (mobile-friendly) -->
+    <div class="mols" role="group" aria-label="Quick molecule picks">
+      <button type="button" class="chip" data-mol="CH4">CH₄</button>
+      <button type="button" class="chip" data-mol="CO">CO</button>
+      <button type="button" class="chip" data-mol="H2O">H₂O</button>
+      <button type="button" class="chip" data-mol="NH3">NH₃</button>
+      <button type="button" class="chip" data-mol="O2">O₂</button>
+    </div>
+
     <div class="row">
       <label class="visually-hidden" for="mol">Molecule</label>
       <select id="mol" aria-label="Molecule">
@@ -125,7 +154,6 @@
       </div>
 
       <button class="btn btn-primary" id="calc" type="button" onclick="computeAndRender()">Calculate</button>
-
     </div>
 
     <div class="mini" role="region" aria-label="Results">
@@ -169,7 +197,7 @@
 
 <!-- === Calculator client: calls your API (no formulas in browser) === -->
 <script>
-  // Force LOCAL API while testing
+  // Use production API
   const API_URL = "https://thermocalc-api.onrender.com/api/calc";
 
   const molSel = document.getElementById("mol");
@@ -221,13 +249,27 @@
     }
   }
 
-  // Optional: also run once on load
+  // Chip wiring
+  const chips = Array.from(document.querySelectorAll(".mols .chip"));
+  function syncChips(){
+    chips.forEach(btn => btn.setAttribute("aria-pressed", btn.dataset.mol === molSel.value ? "true" : "false"));
+  }
+  chips.forEach(btn => {
+    btn.addEventListener("click", () => {
+      molSel.value = btn.dataset.mol;
+      syncChips();
+      computeAndRender(); // compute immediately on tap
+    });
+  });
+  molSel.addEventListener("change", syncChips);
+
+  // Initial render + chip state
   window.addEventListener("DOMContentLoaded", () => {
     console.log("ThermoCalc script loaded");
-    // computeAndRender(); // uncomment if you want an auto-run on load
+    syncChips();
+    // computeAndRender(); // uncomment if you want auto-run on page load
   });
 </script>
-
 
 </body>
 </html>
