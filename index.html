@@ -192,6 +192,18 @@
 
     tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
 <script>const API_URL = "http://127.0.0.1:8000/api/calc";</script>
+<!-- Force local API while testing -->
+<script>
+  window.API_URL = "http://127.0.0.1:8000/api/calc";
+</script>
+const payload = { molecule, temperatureK: T };
+console.log("POST ->", window.API_URL, payload);
+
+  fetch(window.API_URL, { ... })
+const raw = await res.text();
+console.log("status", res.status, "response", raw);
+if(!res.ok) throw new Error(raw);
+const r = JSON.parse(raw);
 
     try{
       const res = await fetch(API_URL, {
