@@ -29,6 +29,14 @@
   margin-right: 8px;
   border-radius: 6px; /* optional, keeps it neat */
 }
+/* shared container width like other sections */
+.wrap{max-width:1040px;margin:18px auto;padding:0 16px}
+
+/* contact strip */
+.contact{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.contact .msg{font-size:16px;color:var(--muted)}
+.contact .msg b{color:var(--ink-strong)}
+.contact .spacer{flex:1 1 auto;min-width:12px}
 
   /* Header / nav (match homepage) */
   header{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:24px auto;padding:0 16px}
@@ -190,10 +198,18 @@
     </ul>
     <p class="note">Need a receipt or refund? Use the Stripe receipt or reply to your order email.</p>
   </div>
+<section class="wrap">
+  <div class="card pad contact">
+    <p class="msg">
+      <b>Questions</b> or a molecule you want added?
+      We’re happy to validate more species on request.
+    </p>
+    <span class="spacer"></span>
+    <a class="btn btn-outline" href="/purchase.html">Purchase page</a>
+    <a class="btn btn-primary" href="mailto:info@thermocalc.site">info@thermocalc.site</a>
+  </div>
 </section>
-  <section class="card">
-    <p class="kicker">Questions or a molecule you want added? Reach out via the <a href="/purchase.html">Purchase</a> page or info@thermocalc.site — we’re happy to validate more species on request.</p>
-  </section>
+
 <footer>
   <div>© <span id="yr"></span> ThermoCalc Web. All rights reserved.</div>
   <div>Values computed from validated statistical thermodynamics models.</div>
