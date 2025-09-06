@@ -43,8 +43,8 @@
     .calc input[type="number"]{text-align:right;font-variant-numeric:tabular-nums}
     .unit input[disabled]{width:56px;text-align:center;padding:8px}
 
-    /* Mobile-friendly molecule chips */
-    .mols{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+    /* Molecule chips (hidden on desktop by default) */
+    .mols{display:none; gap:8px; flex-wrap:wrap; margin:6px 0 10px}
     .chip{
       border:1px solid var(--line);
       background:#fff;
@@ -77,13 +77,15 @@
       .nav a{display:block;padding:10px 0;margin:0}
       #menuBtn{display:inline-block}
     }
+    /* Mobile: show chips, hide dropdown, stack inputs */
     @media (max-width:560px){
       .card.calc{padding:16px}
       .hero p{font-size:16px}
       footer{flex-direction:column;align-items:flex-start;gap:8px}
-      .row{grid-template-columns:1fr;}              /* stack inputs/button */
-      .mols{overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;}
-      .mols .chip{flex:0 0 auto;}
+      .row{grid-template-columns:1fr}
+      .mols{display:flex; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch;}
+      .mols .chip{flex:0 0 auto}
+      #mol{display:none} /* hide dropdown on mobile */
     }
     @media (prefers-color-scheme: dark){
       :root{ --bg:#0b1220;--card:#0f172a;--ink:#e5e7eb;--muted:#94a3b8;--accent:#60a5fa;--line:#1f2937;--ink-strong:#f3f4f6;--btn:#3b82f6;--btn-ink:#fff;--btn-outline:#2b3647; }
@@ -128,7 +130,7 @@
   <aside class="card calc" id="calculator" aria-label="Thermodynamic calculator">
     <h3>Thermodynamic Calculations</h3>
 
-    <!-- Quick picks (mobile-friendly) -->
+    <!-- Chips (visible only on mobile) -->
     <div class="mols" role="group" aria-label="Quick molecule picks">
       <button type="button" class="chip" data-mol="CH4">CH₄</button>
       <button type="button" class="chip" data-mol="CO">CO</button>
@@ -139,6 +141,7 @@
 
     <div class="row">
       <label class="visually-hidden" for="mol">Molecule</label>
+      <!-- Dropdown (hidden on mobile; visible on desktop) -->
       <select id="mol" aria-label="Molecule">
         <option value="CH4">CH₄</option>
         <option value="CO">CO</option>
@@ -197,7 +200,6 @@
 
 <!-- === Calculator client: calls your API (no formulas in browser) === -->
 <script>
-  // Use production API
   const API_URL = "https://thermocalc-api.onrender.com/api/calc";
 
   const molSel = document.getElementById("mol");
@@ -209,28 +211,21 @@
   async function computeAndRender(){
     const molecule = molSel.value;
     const T = parseFloat(tempEl.value);
-
     if(!(T > 0)){
       tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
       return;
     }
-
     const payload = { molecule, temperatureK: T };
-    console.log("POST ->", API_URL, payload);
     tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
-
     try{
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-
       const raw = await res.text();
-      console.log("status", res.status, "response", raw);
       if(!res.ok) throw new Error(raw);
-
-      const r = JSON.parse(raw); // {Cp,Cv,S,U,H,G}
+      const r = JSON.parse(raw);
       const rows = [
         ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
         ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
@@ -239,17 +234,14 @@
         ["H",             format(r.H/1000, 3), "kJ/mol"],
         ["G",             format(r.G/1000, 3), "kJ/mol"]
       ];
-      tbody.innerHTML = rows.map(([k,v,u]) =>
-        `<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`
-      ).join("");
-
+      tbody.innerHTML = rows.map(([k,v,u]) => `<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`).join("");
     }catch(e){
       tbody.innerHTML = `<tr><td colspan="3">Error: ${e.message}</td></tr>`;
       console.error(e);
     }
   }
 
-  // Chip wiring
+  // Chips: visible on mobile; keep dropdown for desktop
   const chips = Array.from(document.querySelectorAll(".mols .chip"));
   function syncChips(){
     chips.forEach(btn => btn.setAttribute("aria-pressed", btn.dataset.mol === molSel.value ? "true" : "false"));
@@ -258,16 +250,13 @@
     btn.addEventListener("click", () => {
       molSel.value = btn.dataset.mol;
       syncChips();
-      computeAndRender(); // compute immediately on tap
+      computeAndRender(); // run immediately on tap (mobile)
     });
   });
   molSel.addEventListener("change", syncChips);
 
-  // Initial render + chip state
   window.addEventListener("DOMContentLoaded", () => {
-    console.log("ThermoCalc script loaded");
     syncChips();
-    // computeAndRender(); // uncomment if you want auto-run on page load
   });
 </script>
 
