@@ -107,18 +107,87 @@
   </div>
 </section>
 
-<!-- Pricing (unchanged markup) -->
+<!-- Pricing -->
 <section class="pricing">
-  <!-- [your three plan cards as-is] -->
-  <!-- ... -->
+  <!-- Single CSV -->
+  <div class="plan card">
+    <div class="hd">
+      <div class="title">Single CSV</div>
+      <div class="price">$9<span class="per">one&#8209;time</span></div>
+    </div>
+    <div class="bd">
+      <ul>
+        <li><i>✅</i> One molecule, one method (e.g., CO J-sum)</li>
+        <li><i>📄</i> Adjustable parameters (e.g., T or p)</li>
+        <li><i>🧮</i> Full q<sub>el</sub> contributions included</li>
+        <li><i>🔬</i> Ready for homework, labs, and research notes</li>
+      </ul>
+      <a id="buy-single" class="btn btn-primary btn-block" href="#" rel="nofollow">Buy Single CSV</a>
+      <div class="tiny">Instant download after payment</div>
+    </div>
+  </div>
+
+  <!-- All CSV bundle -->
+  <div class="plan card" style="outline:2px solid rgba(37,99,235,.10)">
+    <div class="hd">
+      <div class="title">All CSV bundle <span class="badge">Best value</span></div>
+      <div class="price">$29<span class="per">one&#8209;time</span></div>
+    </div>
+    <div class="bd">
+      <ul>
+        <li><i>📦</i> CO (J-sum), O₂ (J-sum), CH₄ (classical), H₂O (classical), NH₃ (classical)</li>
+        <li><i>📄</i> Adjustable parameters (e.g., T or p)</li>
+        <li><i>🧮</i> Full q<sub>el</sub> contributions included</li>
+        <li><i>🔬</i> Ready for homework, labs, and research notes</li>
+      </ul>
+      <a id="buy-bundle" class="btn btn-primary btn-block" href="#" rel="nofollow">Buy All CSVs</a>
+      <div class="tiny">Instant download after payment</div>
+    </div>
+  </div>
+
+  <!-- Custom molecule -->
+  <div class="plan card">
+    <div class="hd">
+      <div class="title">Custom molecule</div>
+      <div class="price">$35<span class="per">one&#8209;time</span></div>
+    </div>
+    <div class="bd">
+      <ul>
+        <li><i>🧪</i> You provide constants &amp; method (linear J-sum / non-linear classical)</li>
+        <li><i>🧷</i> We validate inputs for consistency</li>
+        <li><i>🔗</i> Delivery by private download link</li>
+      </ul>
+      <a id="buy-custom" class="btn btn-primary btn-block" href="#" rel="nofollow">Order Custom CSV</a>
+      <div class="tiny muted">
+        One revision included for <b>customer-supplied parameter typos</b>; if <i>we</i> make a mistake, corrections are free.
+        Have details handy: σ, rotational constants (cm⁻¹), vibrational fundamentals (cm⁻¹) with degeneracies, and electronic terms (g, T<sub>e</sub> in cm⁻¹) if any.
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- Details / FAQ (unchanged) -->
+<!-- Details / FAQ -->
 <section class="info">
-  <!-- [two info cards as-is] -->
+  <div class="card pad">
+    <h3>What’s included</h3>
+    <ul class="list">
+      <li>CSV headers documenting method, constants, and units</li>
+      <li>C<sub>p</sub>, C<sub>v</sub>, S, U, H, G vs. T (molar)</li>
+      <li>Electronic degeneracies &amp; term energies accounted for</li>
+    </ul>
+    <p class="note">Non-linear rotors use the classical rigid-rotor formula; linear rotors use an exact J-sum. Translation uses Sackur–Tetrode; vibrations are harmonic.</p>
+  </div>
+  <div class="card pad">
+    <h3>How delivery works</h3>
+    <ul class="list">
+      <li><b>Single / Bundle:</b> Stripe redirects to your download page with your files.</li>
+      <li><b>Custom:</b> After checkout, you’ll submit a short form. We email a private link when ready.</li>
+      <li>Links can be time-limited for security; keep your files locally.</li>
+    </ul>
+    <p class="note">Need a receipt or refund? Use the Stripe receipt or reply to your order email.</p>
+  </div>
 </section>
 
-<!-- Contact strip -->
 <section class="wrap">
   <div class="page-card">
     <p class="kicker">
@@ -136,7 +205,6 @@
 </footer>
 
 <script>
-  // Mobile menu toggle
   (function(){
     const btn=document.getElementById('menuBtn');
     const nav=document.querySelector('nav.nav');
@@ -147,7 +215,7 @@
     btn.addEventListener('click',()=>nav.classList.toggle('nav--open'));
   })();
 
-  // Stripe links
+  // Stripe links (replace with real links when ready)
   const STRIPE_SINGLE="https://buy.stripe.com/your_single_csv";
   const STRIPE_BUNDLE="https://buy.stripe.com/your_all_csv_bundle";
   const STRIPE_CUSTOM="https://buy.stripe.com/your_custom_molecule";
