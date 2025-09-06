@@ -37,9 +37,11 @@
     .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
     @media (max-width:960px){ .cols{grid-template-columns:1fr} }
 
+    /* ===== Tables ===== */
+    .table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%;}
     table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right}
-    th:first-child,td:first-child{text-align:left}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+    th:first-child,td:first-child{ text-align:left; white-space:normal } /* allow names to wrap */
     thead th{background:#f8fafc}
     tfoot td{font-weight:700}
     .center{text-align:center!important}
@@ -47,10 +49,13 @@
     table.validation th, table.validation td{ text-align:center }
     table.validation th:first-child, table.validation td:first-child{ text-align:center }
 
-    .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px}
-    .hint{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;border-radius:12px;padding:10px 12px;font-size:14px}
-    .list{margin:.4rem 0 0 .9rem}
-    .list li{margin:.2rem 0}
+    /* Force horizontal scroll on small screens instead of overlapping */
+    @media (max-width:560px){
+      table.validation{ min-width:640px; }
+      th,td{ padding:8px 10px; font-size:14px; }
+      .card{padding:16px}
+      footer{flex-direction:column;align-items:flex-start;gap:8px}
+    }
 
     footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
 
@@ -59,10 +64,6 @@
       .nav.nav--open{display:block}
       .nav a{display:block;padding:10px 0;margin:0}
       #menuBtn{display:inline-block}
-    }
-    @media (max-width:560px){
-      .card{padding:16px}
-      footer{flex-direction:column;align-items:flex-start;gap:8px}
     }
     @media (prefers-color-scheme: dark){
       :root{ --bg:#0b1220;--card:#0f172a;--ink:#e5e7eb;--muted:#94a3b8;--accent:#60a5fa;--line:#1f2937;--ink-strong:#f3f4f6;--btn:#3b82f6;--btn-ink:#fff;--btn-outline:#2b3647; }
@@ -170,7 +171,7 @@
   <h2>Validation <span class="badge">298.15&nbsp;K</span></h2>
   <p class="kicker">Comparison of ThermoCalc vs. CCCBDB at p° = 1&nbsp;bar. Δ = (ThermoCalc − CCCBDB). Typical agreement is within ~0.1–0.5% for these species under RRHO.</p>
 
-  <div style="overflow:auto">
+  <div class="table-wrap">
     <table class="validation" aria-label="Validation table at 298.15 K">
       <colgroup>
         <col style="width:14.285%"><col style="width:14.285%"><col style="width:14.285%">
