@@ -124,7 +124,8 @@
         <input value="K" aria-label="Units K" disabled style="text-align:center;border:1px solid var(--line);border-radius:10px;background:#f8fafc;color:var(--muted)">
       </div>
 
-      <button class="btn btn-primary" id="calc" type="button">Calculate</button>
+      <button class="btn btn-primary" id="calc" type="button" onclick="computeAndRender()">Calculate</button>
+
     </div>
 
     <div class="mini" role="region" aria-label="Results">
@@ -168,24 +169,26 @@
 
 <!-- === Calculator client: calls your API (no formulas in browser) === -->
 <script>
-  // Force LOCAL API while testing.
-  // After deployment, change to your HTTPS API: e.g., "https://api.thermocalc.site/api/calc"
+  // Force LOCAL API while testing
   const API_URL = "http://127.0.0.1:8000/api/calc";
 
   const molSel = document.getElementById("mol");
   const tempEl = document.getElementById("temp");
   const tbody  = document.getElementById("tbody");
+
   function format(n, d=3){ return Number(n).toFixed(d); }
 
   async function computeAndRender(){
     const molecule = molSel.value;
     const T = parseFloat(tempEl.value);
+
     if(!(T > 0)){
       tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
       return;
     }
 
     const payload = { molecule, temperatureK: T };
+    console.log("POST ->", API_URL, payload);
     tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
 
     try{
@@ -195,12 +198,11 @@
         body: JSON.stringify(payload)
       });
 
-      if(!res.ok){
-        const text = await res.text();
-        throw new Error(text || (`HTTP ${res.status}`));
-      }
+      const raw = await res.text();
+      console.log("status", res.status, "response", raw);
+      if(!res.ok) throw new Error(raw);
 
-      const r = await res.json(); // {Cp,Cv,S,U,H,G}
+      const r = JSON.parse(raw); // {Cp,Cv,S,U,H,G}
       const rows = [
         ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
         ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
@@ -215,12 +217,17 @@
 
     }catch(e){
       tbody.innerHTML = `<tr><td colspan="3">Error: ${e.message}</td></tr>`;
+      console.error(e);
     }
   }
 
-  document.getElementById("calc").addEventListener("click", computeAndRender);
-  window.addEventListener("DOMContentLoaded", computeAndRender);
+  // Optional: also run once on load
+  window.addEventListener("DOMContentLoaded", () => {
+    console.log("ThermoCalc script loaded");
+    // computeAndRender(); // uncomment if you want an auto-run on load
+  });
 </script>
+
 
 </body>
 </html>
