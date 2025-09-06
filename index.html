@@ -168,17 +168,9 @@
 
 <!-- === Calculator client: calls your API (no formulas in browser) === -->
 <script>
-  // 1) Set these two:
-  const LOCAL_API = "http://127.0.0.1:8000/api/calc";              // when your API runs on your laptop
-  const PROD_API  = "https://YOUR-API-DOMAIN.example.com/api/calc"; // <- replace after you deploy
-
-  // 2) During local testing you can force LOCAL_API by uncommenting:
-  // const API_URL = LOCAL_API;
-
-  // 3) When deployed, use this auto-switcher instead:
-  const API_URL = (typeof API_URL === "undefined")
-    ? ((location.hostname === "localhost" || location.hostname === "127.0.0.1") ? LOCAL_API : PROD_API)
-    : API_URL;
+  // Force LOCAL API while testing.
+  // After deployment, change to your HTTPS API: e.g., "https://api.thermocalc.site/api/calc"
+  const API_URL = "http://127.0.0.1:8000/api/calc";
 
   const molSel = document.getElementById("mol");
   const tempEl = document.getElementById("temp");
@@ -188,34 +180,26 @@
   async function computeAndRender(){
     const molecule = molSel.value;
     const T = parseFloat(tempEl.value);
-    if(!(T > 0)){ tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>'; return; }
+    if(!(T > 0)){
+      tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
+      return;
+    }
 
+    const payload = { molecule, temperatureK: T };
     tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
-<script>const API_URL = "http://127.0.0.1:8000/api/calc";</script>
-<!-- Force local API while testing -->
-<script>
-  window.API_URL = "http://127.0.0.1:8000/api/calc";
-</script>
-const payload = { molecule, temperatureK: T };
-console.log("POST ->", window.API_URL, payload);
-
-  fetch(window.API_URL, { ... })
-const raw = await res.text();
-console.log("status", res.status, "response", raw);
-if(!res.ok) throw new Error(raw);
-const r = JSON.parse(raw);
 
     try{
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ molecule, temperatureK: T })
+        body: JSON.stringify(payload)
       });
+
       if(!res.ok){
-        let msg = res.statusText;
-        try{ const j = await res.json(); if(j.detail) msg = j.detail; } catch {}
-        throw new Error(msg || ("HTTP " + res.status));
+        const text = await res.text();
+        throw new Error(text || (`HTTP ${res.status}`));
       }
+
       const r = await res.json(); // {Cp,Cv,S,U,H,G}
       const rows = [
         ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
@@ -228,6 +212,7 @@ const r = JSON.parse(raw);
       tbody.innerHTML = rows.map(([k,v,u]) =>
         `<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`
       ).join("");
+
     }catch(e){
       tbody.innerHTML = `<tr><td colspan="3">Error: ${e.message}</td></tr>`;
     }
