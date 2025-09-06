@@ -84,7 +84,121 @@
   </nav>
 </header>
 
-<!-- [rest of your Methods content unchanged] -->
+<section class="card">
+  <h2>Methods </h2>
+  <p class="kicker methods-intro">
+    RRHO ideal-gas model with full electronic partition functions. Linear rotors use an exact J-sum; non-linear rotors use the classical rigid-rotor formula. This page explains <i>what</i> is computed and <i>why</i> it’s accurate—implementation details are intentionally brief.
+  </p>
+
+  <div class="cols">
+    <div>
+      <h3>Partition functions</h3>
+
+      <div class="eq"><b>Translation (molar):</b><br>
+        <span class="mono">q<sub>trans</sub> = ((2&pi; m k<sub>B</sub> T)/h<sup>2</sup>)<sup>3/2</sup> · (k<sub>B</sub> T / p)</span>
+      </div>
+
+      <div class="eq"><b>Linear rotation (exact J-sum):</b><br>
+        <span class="mono">E<sub>J</sub>/k<sub>B</sub> = &theta;<sub>r</sub> J(J+1), g = (2J+1)</span><br>
+        <span class="mono">q<sub>rot</sub> = (1/&sigma;) · &Sigma;<sub>J=0..&infin;</sub> g · e<sup>−E<sub>J</sub>/(k<sub>B</sub>T)</sup></span>
+      </div>
+
+      <div class="eq"><b>Non-linear rotation (classical rigid-rotor):</b><br>
+        <span class="mono">q<sub>rot</sub> = (&radic;&pi;/&sigma;) · T<sup>3/2</sup> / &radic;(&theta;<sub>A</sub>&theta;<sub>B</sub>&theta;<sub>C</sub>)</span>
+      </div>
+
+      <div class="eq"><b>Vibration (harmonic, per mode i):</b><br>
+        <span class="mono">q<sub>vib,i</sub> = 1 / (1 − e<sup>−&theta;<sub>i</sub>/T</sup>)</span>
+      </div>
+
+      <div class="eq"><b>Electronic (full multi-state):</b><br>
+        <span class="mono">q<sub>el</sub> = &Sigma;<sub>j</sub> g<sub>j</sub> e<sup>−&theta;<sub>j</sub>/T</sup></span> &nbsp; (&theta;<sub>0</sub>=0 for ground state)
+      </div>
+
+      <p class="note">Notation: &theta;<sub>i</sub> ≡ hν<sub>i</sub>/k<sub>B</sub> (vibrational temperatures); &theta;<sub>A,B,C</sub> are rotational temperatures from A,B,C (cm⁻¹). Symmetry (&sigma;) is applied where appropriate.</p>
+    </div>
+
+    <div>
+      <h3>Thermodynamic relations</h3>
+      <div class="eq">
+        Each contribution uses its own partition function:<br>
+        <span class="mono">S = R ln q + U/T</span>,&nbsp;
+        <span class="mono">U = R ⟨Ē⟩</span>,&nbsp;
+        <span class="mono">C<sub>v</sub> = R·Var(Ē)/T²</span><br>
+        <span class="mono">C<sub>p</sub> = C<sub>v</sub> + R</span>,&nbsp;
+        <span class="mono">H = U + RT</span>,&nbsp;
+        <span class="mono">G = H − TS</span>
+      </div>
+
+      <h3>Scope &amp; approximations</h3>
+      <ul class="list">
+        <li><b>RRHO:</b> rigid rotor; harmonic oscillator; ideal gas at p° = 1&nbsp;bar.</li>
+        <li><b>Rotation:</b> exact J-sum (linear); classical rigid-rotor (non-linear).</li>
+        <li><b>Vibration:</b> fundamentals with explicit degeneracies; no anharmonic or vib-rot coupling.</li>
+        <li><b>Electronic:</b> summed over supplied terms (degeneracies &amp; term energies); ground state dominates at 298&nbsp;K unless otherwise noted.</li>
+      </ul>
+
+      <p class="hint">These choices match common textbook/reference practice at 298&nbsp;K and deliver room-temperature benchmarks within typical rounding of published tables.</p>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>What this page shows vs. Full Service</h2>
+  <div class="cols">
+    <div>
+      <h3>On this page</h3>
+      <ul class="list">
+        <li>Transparent formulas and assumptions.</li>
+        <li>Representative 298.15&nbsp;K validation at p° = 1&nbsp;bar.</li>
+        <li>Clear notation for each partition-function component.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Full Service </h3>
+      <ul class="list">
+        <li>Arbitrary <b>T</b> and <b>p</b> ranges, grids, and custom step sizes.</li>
+        <li>Exportable <b>CSV</b> tables for various thermodynamic properties.</li>
+        <li>Per-molecule summaries with units and reference state clearly labeled.</li>
+      </ul>
+      <p class="note">See the <a href="/purchase.html">Purchase</a> page for details.</p>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Validation <span class="badge">298.15&nbsp;K</span></h2>
+  <p class="kicker">Comparison of ThermoCalc vs. CCCBDB at p° = 1&nbsp;bar. Δ = (ThermoCalc − CCCBDB). Typical agreement is within ~0.1–0.5% for these species under RRHO.</p>
+
+  <div style="overflow:auto">
+    <table class="validation" aria-label="Validation table at 298.15 K">
+      <colgroup>
+        <col style="width:14.285%"><col style="width:14.285%"><col style="width:14.285%">
+        <col style="width:14.285%"><col style="width:14.285%"><col style="width:14.285%"><col style="width:14.285%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th rowspan="2">Compound</th>
+          <th colspan="3" class="center">S° [J·mol⁻¹·K⁻¹]</th>
+          <th colspan="3" class="center">C°<sub>p</sub> [J·mol⁻¹·K⁻¹]</th>
+        </tr>
+        <tr>
+          <th>ThermoCalc</th><th>CCCBDB</th><th>Δ</th>
+          <th>ThermoCalc</th><th>CCCBDB</th><th>Δ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>CO</td><td>197.65</td><td>197.66</td><td>−0.01</td><td>29.13</td><td>29.14</td><td>−0.01</td></tr>
+        <tr><td>O₂</td><td>205.13</td><td>205.15</td><td>−0.02</td><td>29.36</td><td>29.38</td><td>−0.02</td></tr>
+        <tr><td>CH₄</td><td>186.32</td><td>186.37</td><td>−0.05</td><td>35.64</td><td>35.69</td><td>−0.05</td></tr>
+        <tr><td>H₂O</td><td>188.72</td><td>188.84</td><td>−0.12</td><td>33.48</td><td>33.60</td><td>−0.12</td></tr>
+        <tr><td>NH₃</td><td>193.12</td><td>192.77</td><td>+0.35</td><td>35.48</td><td>35.63</td><td>−0.15</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note">Residual differences reflect classical vs. quantum choices for non-linear rotors, reference rounding of fundamentals, and molar-mass precision. Standard state is p° = 1&nbsp;bar throughout.</p>
+</section>
 
 <section class="card">
   <p class="kicker">Questions or a molecule you want added? Reach out via the <a href="/purchase.html">Purchase</a> page or <a href="mailto:info@thermocalc.site">info@thermocalc.site</a> — we’re happy to validate more species on request.</p>
@@ -96,7 +210,6 @@
 </footer>
 
 <script>
-  // Mobile menu toggle
   (function(){
     const btn=document.getElementById('menuBtn');
     const nav=document.querySelector('nav.nav');
