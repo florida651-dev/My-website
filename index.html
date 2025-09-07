@@ -210,8 +210,7 @@
 
 <!-- Calculator client: calls your API + shows low-T note for non-linear rotors -->
 <script>
-const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
-
+  const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
 
   const molSel = document.getElementById("mol");
   const tempEl = document.getElementById("temp");
@@ -221,10 +220,9 @@ const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
   function format(n, d=3){ return Number(n).toFixed(d); }
 
   // --- Low-T rotation guard (client-side note only) ---
-  // Rotational constants (cm^-1) matching your dataset
   const ROT_DATA = {
-    CO:  { kind:"linear"   }, // linear uses exact J-sum; no guard needed
-    O2:  { kind:"linear"   },
+    CO:  { kind:"linear" },
+    O2:  { kind:"linear" },
     CH4: { kind:"nonlinear", A:5.2412,  B:5.2412,  C:5.2412,  sigma:12 },
     H2O: { kind:"nonlinear", A:27.8770, B:14.5120, C:9.2850,  sigma:2  },
     NH3: { kind:"nonlinear", A:9.44430, B:9.44430, C:6.19600, sigma:3  }
@@ -252,44 +250,33 @@ const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
       return;
     }
 
-    // Show low-T rotation advisory (nonlinear only)
+    // advisory for nonlinear rotors
     const msg = lowTRotationMessage(molecule, T);
     if (msg) noteEl.textContent = msg;
 
     const payload = { molecule, temperatureK: T };
     tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
-    try{
+
+    try {
       const res = await fetch(API_URL, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(payload)
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-const raw = await res.text();
-let data;
-try { data = JSON.parse(raw); } catch { data = null; }
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { data = null; }
 
-if (!res.ok) {
-  const msg  = (data && (data.error || data.detail)) || "Request failed";
-  const hint = (data && data.hint) ? ` — ${data.hint}` : "";
-  tbody.innerHTML = `<tr><td colspan="3">Error: ${msg}${hint}</td></tr>`;
-  if (data && data.hint) noteEl.textContent = data.hint; // also surface in the low-T note
-  return;
-}
+      if (!res.ok) {
+        const msg  = (data && (data.error || data.detail)) || "Request failed";
+        const hint = (data && data.hint) ? ` — ${data.hint}` : "";
+        tbody.innerHTML = `<tr><td colspan="3">Error: ${msg}${hint}</td></tr>`;
+        if (data && data.hint) noteEl.textContent = data.hint;
+        return;
+      }
 
-const r = data;
-const rows = [
-  ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
-  ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
-  ["S",             format(r.S ), "J/(mol·K)"],
-  ["U",             format(r.U/1000, 3), "kJ/mol"],
-  ["H",             format(r.H/1000, 3), "kJ/mol"],
-  ["G",             format(r.G/1000, 3), "kJ/mol"]
-];
-tbody.innerHTML = rows.map(
-  ([k,v,u]) => `<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`
-).join("");
-
+      const r = data;
       const rows = [
         ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
         ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
@@ -298,8 +285,11 @@ tbody.innerHTML = rows.map(
         ["H",             format(r.H/1000, 3), "kJ/mol"],
         ["G",             format(r.G/1000, 3), "kJ/mol"]
       ];
-      tbody.innerHTML = rows.map(([k,v,u]) => `<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`).join("");
-    }catch(e){
+      tbody.innerHTML = rows
+        .map(([k,v,u]) => `<tr><td><b>${k}</b></td><td>${v}</td><td>${u}</td></tr>`)
+        .join("");
+
+    } catch (e) {
       tbody.innerHTML = `<tr><td colspan="3">Error: ${e.message}</td></tr>`;
       console.error(e);
     }
@@ -308,21 +298,23 @@ tbody.innerHTML = rows.map(
   // Chips (mobile quick-select)
   const chips = Array.from(document.querySelectorAll(".mols .chip"));
   function syncChips(){
-    chips.forEach(btn => btn.setAttribute("aria-pressed", btn.dataset.mol === molSel.value ? "true" : "false"));
+    chips.forEach(btn =>
+      btn.setAttribute("aria-pressed", btn.dataset.mol === molSel.value ? "true" : "false")
+    );
   }
   chips.forEach(btn => {
     btn.addEventListener("click", () => {
       molSel.value = btn.dataset.mol;
       syncChips();
-      computeAndRender(); // run immediately on tap
+      computeAndRender();
     });
   });
   molSel.addEventListener("change", syncChips);
 
-  // Wire calculate button + initial render
   document.getElementById('calc').addEventListener('click', computeAndRender);
   window.addEventListener("DOMContentLoaded", () => { syncChips(); computeAndRender(); });
 </script>
+
 
 </body>
 </html>
