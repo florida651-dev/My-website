@@ -16,6 +16,7 @@
     a{color:var(--accent);text-decoration:none}
     img,svg,video{max-width:100%;height:auto}
 
+    /* Header / Nav */
     header{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:24px auto;padding:0 16px;gap:10px}
     .brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.2px;line-height:1}
     .brand-logo{height:28px;width:28px;display:block;border-radius:6px;flex:0 0 auto}
@@ -24,6 +25,7 @@
     .nav a[aria-current="page"]{font-weight:800;color:var(--ink-strong)}
     #menuBtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;display:none}
 
+    /* Hero */
     .hero{max-width:1040px;margin:32px auto;padding:0 16px;display:grid;grid-template-columns:1.2fr .9fr;gap:28px}
     .hero h1{margin:.2rem 0 .4rem;font-size:clamp(28px,4.5vw,46px);line-height:1.15;color:var(--ink-strong)}
     .hero p{color:var(--muted);font-size:18px;max-width:62ch}
@@ -31,19 +33,24 @@
     .point{display:flex;gap:10px;align-items:flex-start;color:var(--ink)}
     .point i{font-style:normal;font-size:20px;line-height:1.1}
     .cta{display:flex;gap:12px;margin-top:10px}
+
+    /* Buttons */
     .btn{appearance:none;border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer;min-height:44px;line-height:1.2}
     .btn-primary{background:var(--btn);color:var(--btn-ink);box-shadow:0 6px 20px rgba(37,99,235,.25)}
     .btn-outline{background:transparent;border:1px solid var(--btn-outline);color:var(--ink)}
 
+    /* Card & Calculator */
     .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.08)}
     .calc{padding:18px}
     .calc h3{margin:.2rem 0 .8rem}
     .row{display:grid;grid-template-columns:1fr minmax(180px,1fr) auto;gap:10px}
     .unit{display:grid;grid-template-columns:1fr 56px;gap:8px}
+    select,input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
     .calc input[type="number"]{text-align:right;font-variant-numeric:tabular-nums}
+    .calc button{width:100%;margin:6px 0 12px}
     .unit input[disabled]{width:56px;text-align:center;padding:8px}
 
-    /* Molecule chips (hidden on desktop by default) */
+    /* Molecule chips (shown on small screens) */
     .mols{display:none; gap:8px; flex-wrap:wrap; margin:6px 0 10px}
     .chip{
       border:1px solid var(--line);
@@ -53,23 +60,23 @@
       font-weight:700;
       cursor:pointer;
     }
-    .chip[aria-pressed="true"]{
-      background:var(--btn);
-      color:var(--btn-ink);
-      border-color:var(--btn);
-    }
+    .chip[aria-pressed="true"]{ background:var(--btn); color:var(--btn-ink); border-color:var(--btn); }
 
-    select,input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink)}
-    .calc button{width:100%;margin:6px 0 12px}
+    /* Results table */
     .mini{border:1px solid var(--line);border-radius:12px;padding:10px}
     .mini table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
     .mini th,.mini td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
     .mini th:first-child,.mini td:first-child{text-align:left}
+
     .kicker{color:var(--muted);font-size:14px;margin-top:10px;overflow-wrap:anywhere}
     .footnote{max-width:1040px;margin:18px auto 0;padding:0 16px;color:var(--muted);font-size:14px}
+
+    /* Footer */
     footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
+
     .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;width:1px;overflow:hidden;white-space:nowrap}
 
+    /* Responsive */
     @media (max-width:960px){ .hero{grid-template-columns:1fr} }
     @media (max-width:720px){
       .nav{display:none}
@@ -77,7 +84,6 @@
       .nav a{display:block;padding:10px 0;margin:0}
       #menuBtn{display:inline-block}
     }
-    /* Mobile: show chips, hide dropdown, stack inputs */
     @media (max-width:560px){
       .card.calc{padding:16px}
       .hero p{font-size:16px}
@@ -85,8 +91,10 @@
       .row{grid-template-columns:1fr}
       .mols{display:flex; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch;}
       .mols .chip{flex:0 0 auto}
-      #mol{display:none} /* hide dropdown on mobile */
+      #mol{display:none} /* dropdown hidden on mobile; chips visible */
     }
+
+    /* Dark mode */
     @media (prefers-color-scheme: dark){
       :root{ --bg:#0b1220;--card:#0f172a;--ink:#e5e7eb;--muted:#94a3b8;--accent:#60a5fa;--line:#1f2937;--ink-strong:#f3f4f6;--btn:#3b82f6;--btn-ink:#fff;--btn-outline:#2b3647; }
       body{background:var(--bg)}
@@ -130,7 +138,7 @@
   <aside class="card calc" id="calculator" aria-label="Thermodynamic calculator">
     <h3>Thermodynamic Calculations</h3>
 
-    <!-- Chips (visible only on mobile) -->
+    <!-- Molecule chips (shown on small screens) -->
     <div class="mols" role="group" aria-label="Quick molecule picks">
       <button type="button" class="chip" data-mol="CH4">CH₄</button>
       <button type="button" class="chip" data-mol="CO">CO</button>
@@ -141,7 +149,6 @@
 
     <div class="row">
       <label class="visually-hidden" for="mol">Molecule</label>
-      <!-- Dropdown (hidden on mobile; visible on desktop) -->
       <select id="mol" aria-label="Molecule">
         <option value="CH4">CH₄</option>
         <option value="CO">CO</option>
@@ -156,7 +163,7 @@
         <input value="K" aria-label="Units K" disabled style="text-align:center;border:1px solid var(--line);border-radius:10px;background:#f8fafc;color:var(--muted)">
       </div>
 
-      <button class="btn btn-primary" id="calc" type="button" onclick="computeAndRender()">Calculate</button>
+      <button class="btn btn-primary" id="calc" type="button">Calculate</button>
     </div>
 
     <div class="mini" role="region" aria-label="Results">
@@ -165,6 +172,9 @@
         <tbody id="tbody"></tbody>
       </table>
     </div>
+
+    <!-- Low-T message appears here when relevant -->
+    <p id="lowT-note" class="kicker" style="margin-top:6px;color:#64748b;"></p>
 
     <p class="kicker">
       RRHO ideal gas; linear rotors: exact J-sum; nonlinear: classical rigid-rotor; full electronic partition function; Sackur–Tetrode translation; harmonic-oscillator vibration (p° = 1 bar).
@@ -184,7 +194,7 @@
   <div>Values computed from validated statistical thermodynamics models.</div>
 </footer>
 
-<!-- Small UI script -->
+<!-- Small UI script: mobile menu -->
 <script>
   (function(){
     const btn=document.getElementById('menuBtn');
@@ -198,23 +208,53 @@
   document.getElementById('yr').textContent=new Date().getFullYear();
 </script>
 
-<!-- === Calculator client: calls your API (no formulas in browser) === -->
+<!-- Calculator client: calls your API + shows low-T note for non-linear rotors -->
 <script>
-const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
+  const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
 
   const molSel = document.getElementById("mol");
   const tempEl = document.getElementById("temp");
   const tbody  = document.getElementById("tbody");
+  const noteEl = document.getElementById("lowT-note");
 
   function format(n, d=3){ return Number(n).toFixed(d); }
+
+  // --- Low-T rotation guard (client-side note only) ---
+  // Rotational constants (cm^-1) matching your dataset
+  const ROT_DATA = {
+    CO:  { kind:"linear"   }, // linear uses exact J-sum; no guard needed
+    O2:  { kind:"linear"   },
+    CH4: { kind:"nonlinear", A:5.2412,  B:5.2412,  C:5.2412,  sigma:12 },
+    H2O: { kind:"nonlinear", A:27.8770, B:14.5120, C:9.2850,  sigma:2  },
+    NH3: { kind:"nonlinear", A:9.44430, B:9.44430, C:6.19600, sigma:3  }
+  };
+  const kB = 1.380649e-23, h = 6.62607015e-34, c = 299792458;
+  function thetaFromCm1(cm1){ return (h*c*cm1*100)/kB; }
+  function lowTRotationMessage(molKey, T){
+    const d = ROT_DATA[molKey];
+    if(!d || d.kind !== "nonlinear") return "";
+    const tA = thetaFromCm1(d.A), tB = thetaFromCm1(d.B), tC = thetaFromCm1(d.C);
+    const tMin = Math.min(tA, tB, tC);
+    const floor = Math.max(7, 2*tMin); // ~2×θ_min or 7 K
+    return (T < floor)
+      ? `Rotational low-T note: classical rigid-rotor is unreliable below ~${tMin.toFixed(1)} K (θₘᵢₙ). Results may deviate; a safer region is ≥ ${floor.toFixed(1)} K.`
+      : "";
+  }
 
   async function computeAndRender(){
     const molecule = molSel.value;
     const T = parseFloat(tempEl.value);
+    noteEl.textContent = "";
+
     if(!(T > 0)){
       tbody.innerHTML = '<tr><td colspan="3">Enter a valid temperature &gt; 0 K.</td></tr>';
       return;
     }
+
+    // Show low-T rotation advisory (nonlinear only)
+    const msg = lowTRotationMessage(molecule, T);
+    if (msg) noteEl.textContent = msg;
+
     const payload = { molecule, temperatureK: T };
     tbody.innerHTML = '<tr><td colspan="3">Calculating…</td></tr>';
     try{
@@ -229,7 +269,7 @@ const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
       const rows = [
         ["C<sub>p</sub>", format(r.Cp), "J/(mol·K)"],
         ["C<sub>v</sub>", format(r.Cv), "J/(mol·K)"],
-        ["S",             format(r.S),  "J/(mol·K)"],
+        ["S",             format(r.S ), "J/(mol·K)"],
         ["U",             format(r.U/1000, 3), "kJ/mol"],
         ["H",             format(r.H/1000, 3), "kJ/mol"],
         ["G",             format(r.G/1000, 3), "kJ/mol"]
@@ -241,7 +281,7 @@ const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
     }
   }
 
-  // Chips: visible on mobile; keep dropdown for desktop
+  // Chips (mobile quick-select)
   const chips = Array.from(document.querySelectorAll(".mols .chip"));
   function syncChips(){
     chips.forEach(btn => btn.setAttribute("aria-pressed", btn.dataset.mol === molSel.value ? "true" : "false"));
@@ -250,14 +290,14 @@ const API_URL = "https://thermocalc-vercel-api.vercel.app/api/calc";
     btn.addEventListener("click", () => {
       molSel.value = btn.dataset.mol;
       syncChips();
-      computeAndRender(); // run immediately on tap (mobile)
+      computeAndRender(); // run immediately on tap
     });
   });
   molSel.addEventListener("change", syncChips);
 
-  window.addEventListener("DOMContentLoaded", () => {
-    syncChips();
-  });
+  // Wire calculate button + initial render
+  document.getElementById('calc').addEventListener('click', computeAndRender);
+  window.addEventListener("DOMContentLoaded", () => { syncChips(); computeAndRender(); });
 </script>
 
 </body>
