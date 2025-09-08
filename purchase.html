@@ -59,19 +59,11 @@
     .plan .hd .price{display:flex;align-items:baseline;gap:4px;white-space:nowrap;flex:0 0 auto}
     .plan .hd .price .per{white-space:nowrap;word-break:keep-all;overflow-wrap:normal}
 
-    /* keep ready-to-go clean */
+    /* ready-to-go: always readable */
     .oneline{
-      min-width:0;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    @media (max-width:1200px){
-      .oneline{
-        white-space:normal;
-        overflow:visible;
-        text-overflow:clip;
-      }
+      white-space:normal;
+      overflow:visible;
+      text-overflow:unset;
     }
 
     .info{max-width:1040px;margin:18px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -171,7 +163,7 @@
         <li><i>🧪</i> You provide constants &amp; method (linear J-sum / non-linear classical)</li>
         <li><i>🧷</i> We validate inputs for consistency</li>
         <li><i>🔗</i> Delivery by private download link</li>
-        <li><i>⚡</i> <span class="oneline"><b>Ready-to-go:</b> CO₂, O₃, PF₅, CCl₄ already validated, instant delivery ($35)</span></li>
+        <li><i>⚡</i> <span class="oneline"><b>Ready-to-go:</b> CO₂, O₃, PF₅, CCl₄ — instant delivery ($35)</span></li>
       </ul>
       <a id="buy-custom" class="btn btn-primary btn-block" href="#" rel="nofollow">Order Custom CSV</a>
       <div class="tiny muted">
@@ -244,3 +236,4 @@
 </script>
 </body>
 </html>
+
