@@ -73,7 +73,6 @@
 
     /* Footer */
     footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
-    footer .links a{margin-left:14px}
 
     .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;width:1px;overflow:hidden;white-space:nowrap}
 
@@ -93,7 +92,6 @@
       .mols{display:flex; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch;}
       .mols .chip{flex:0 0 auto}
       #mol{display:none} /* dropdown hidden on mobile; chips visible */
-      footer .links a{margin-left:0;margin-right:14px}
     }
 
     /* Dark mode */
@@ -191,65 +189,9 @@
   <p>ThermoCalc Web is developed by a chemist with graduate-level training in thermodynamics. Methods are benchmarked against CCCBDB/NIST reference data, ensuring accuracy and transparency.</p>
 </section>
 
-<!-- === Legal Notice (Japan) — SCTA compliant section === -->
-<section class="card" id="legal-japan" aria-label="Legal Notice (Japan)" style="max-width:1040px;margin:24px auto;padding:18px">
-  <h2>Legal Notice (Japan) — Act on Specified Commercial Transactions</h2>
-
-  <h3>Seller</h3>
-  <p>
-    <strong>Business Name:</strong> Disclosed on request (for customers in Japan)<br>
-    <strong>Responsible Person:</strong> Thermocalc<br>
-    <strong>Address:</strong> Disclosed on request (for customers in Japan)<br>
-    <strong>Telephone:</strong> Disclosed on request (for customers in Japan)<br>
-    <strong>Contact Email:</strong> <a href="mailto:info@thermocalc.site">info@thermocalc.site</a><br>
-    <strong>Website:</strong> <a href="https://thermocalc.site/">https://thermocalc.site/</a>
-  </p>
-
-  <h3>Business details on request (for Japan)</h3>
-  <p>
-    We will provide our full legal name, address, and telephone number <strong>without delay upon request, before purchase</strong>.
-    Please contact <a href="mailto:info@thermocalc.site?subject=Business%20details%20request%20(Japan)">info@thermocalc.site</a>.
-  </p>
-  <p>
-    <em>日本のお客様向け：</em>
-    ご請求があった場合、<strong>購入前に遅滞なく</strong>、事業者の氏名（名称）・住所・電話番号を開示いたします。
-    <a href="mailto:info@thermocalc.site?subject=%E7%89%B9%E5%95%86%E6%B3%95%E8%A1%A8%E8%A8%98%E6%83%85%E5%A0%B1%E3%81%AE%E9%96%8B%E7%A4%BA%E8%AB%8B%E6%B1%82">info@thermocalc.site</a> までご連絡ください。
-  </p>
-
-  <h3>Prices</h3>
-  <p>USD $9–$35 (Japanese taxes included). No additional fees.</p>
-
-  <h3>Fees other than price</h3>
-  <p>No extra fees are charged.</p>
-
-  <h3>Payment method &amp; timing</h3>
-  <p>Credit card (via Stripe). Payment is charged instantly at order time.</p>
-
-  <h3>Delivery / provision timing</h3>
-  <p>
-    Custom requests: within one week.<br>
-    All other services: immediate after successful payment.
-  </p>
-
-  <h3>Refunds / cancellations</h3>
-  <p>
-    Defective: full refund.<br>
-    Non-defective: non-refundable.
-  </p>
-
-  <h3>System requirements</h3>
-  <p>Modern web browser (latest Chrome, Safari, Firefox, or Edge) and internet connection.</p>
-
-  <p class="kicker">
-    This section is intended to satisfy the Japanese Act on Specified Commercial Transactions for customers located in Japan.
-  </p>
-</section>
-
 <footer>
   <div>© <span id="yr"></span> ThermoCalc Web. All rights reserved.</div>
-  <div class="links">
-    <a href="#legal-japan">Legal Notice (Japan)</a>
-  </div>
+  <div>Values computed from validated statistical thermodynamics models.</div>
 </footer>
 
 <!-- Small UI script: mobile menu -->
@@ -323,16 +265,18 @@
       });
 
       const raw = await res.text();
-      let data;
-      try { data = JSON.parse(raw); } catch { data = null; }
+let data;
+try { data = JSON.parse(raw); } catch { data = null; }
 
-      if (!res.ok) {
-        const msg   = (data && (data.error || "Request failed")) ;
-        const extra = (data && (data.explanation || data.detail)) ? ` — ${data.explanation || data.detail}` : "";
-        tbody.innerHTML = `<tr><td colspan="3">Error: ${msg}${extra}</td></tr>`;
-        if (data && data.explanation) noteEl.textContent = data.explanation;
-        return;
-      }
+if (!res.ok) {
+  const msg   = (data && (data.error || "Request failed")) ;
+  const extra = (data && (data.explanation || data.detail)) ? ` — ${data.explanation || data.detail}` : "";
+  tbody.innerHTML = `<tr><td colspan="3">Error: ${msg}${extra}</td></tr>`;
+  // Optionally also display the explanation in your lowT note area
+  if (data && data.explanation) noteEl.textContent = data.explanation;
+  return;
+}
+
 
       const r = data;
       const rows = [
@@ -373,6 +317,6 @@
   window.addEventListener("DOMContentLoaded", () => { syncChips(); computeAndRender(); });
 </script>
 
+
 </body>
 </html>
-
