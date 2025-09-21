@@ -72,54 +72,31 @@
 </header>
 
 <main class="page">
-  <section class="card" aria-label="Legal & Compliance">
-    <h1>Sales & Compliance (Merchant of Record)</h1>
+ <section class="card" aria-label="Legal & Compliance">
+  <h1>Sales & Compliance (Merchant of Record)</h1>
 
-    <p><strong>Sales are processed by Lemon Squeezy (Merchant of Record).</strong> Lemon Squeezy is the seller of record and handles taxes, payment processing, refunds, and chargebacks for purchases made via our checkout.</p>
+  <p><strong>Sales are processed by Lemon Squeezy (Merchant of Record).</strong>
+     Lemon Squeezy is the seller of record and handles taxes, payment processing,
+     refunds, and chargebacks for purchases made via our checkout.</p>
 
-    <h2>Contact</h2>
-    <p>
-      <strong>Email:</strong> <a href="mailto:info@thermocalc.site">info@thermocalc.site</a><br>
-      <strong>Website:</strong> <a href="https://thermocalc.site/">https://thermocalc.site/</a>
-    </p>
+  <h2>Contact</h2>
+  <p>
+    <strong>Email:</strong> <a href="mailto:info@thermocalc.site">info@thermocalc.site</a><br>
+    <strong>Website:</strong> <a href="https://thermocalc.site/">https://thermocalc.site/</a>
+  </p>
 
-    <h2>Japan customers (on-request disclosure)</h2>
-    <p>For customers in Japan, we will provide our full legal name, address, and telephone number <strong>without delay upon request, before purchase</strong>. Please contact <a href="mailto:info@thermocalc.site?subject=Business%20details%20request">info@thermocalc.site</a>.</p>
+  <!-- Removed the Japan customers section -->
 
-    <h2>Product & fulfillment</h2>
-    <p>
-      <strong>Prices:</strong> USD $9–$35 (any applicable taxes are handled at checkout).<br>
-      <strong>Fees other than price:</strong> none.<br>
-      <strong>Payment method & timing:</strong> card and other methods provided by Lemon Squeezy; payment is charged at order time.<br>
-      <strong>Delivery:</strong> instant download for standard sets; within one week for custom requests.<br>
-      <strong>Refunds:</strong> defective—full refund; non-defective—non-refundable.<br>
-      <strong>System requirements:</strong> modern browser (latest Chrome, Safari, Firefox, Edge) and internet connection.
-    </p>
+  <h2>Product &amp; fulfillment</h2>
+  <p>
+    <strong>Prices:</strong> USD $9–$35 (any applicable taxes handled at checkout).<br>
+    <strong>Fees other than price:</strong> none.<br>
+    <strong>Payment method &amp; timing:</strong> methods provided by Lemon Squeezy; payment is charged at order time.<br>
+    <strong>Delivery:</strong> instant download for standard sets; within one week for custom requests.<br>
+    <strong>Refunds:</strong> defective—full refund; non-defective—non-refundable.<br>
+    <strong>System requirements:</strong> modern browser (latest Chrome, Safari, Firefox, Edge) and internet connection.
+  </p>
 
-    <p class="kicker">This page explains how sales and compliance are handled for purchases made through our Lemon Squeezy checkout.</p>
-  </section>
-</main>
+  <p class="kicker">This page explains how sales and compliance are handled for purchases made through our Lemon Squeezy checkout.</p>
+</section>
 
-<footer>
-  <div>© <span id="yr"></span> QuantaThermo. All rights reserved.</div>
-  <div>Values computed from validated statistical thermodynamics models.</div>
-</footer>
-
-<script>
-  (function(){
-    const btn=document.getElementById('menuBtn');
-    const nav=document.querySelector('nav.nav');
-    if(!btn||!nav) return;
-    const mq=window.matchMedia('(max-width: 720px)');
-    function apply(){ btn.style.display=mq.matches?'inline-block':'none'; if(!mq.matches) nav.classList.remove('nav--open'); }
-    mq.addEventListener('change',apply); apply();
-    btn.addEventListener('click',()=>{
-      const open = nav.classList.toggle('nav--open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  })();
-  document.getElementById('yr').textContent=new Date().getFullYear();
-</script>
-
-</body>
-</html>
