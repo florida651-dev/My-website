@@ -109,74 +109,91 @@
 
 </header>
 
+<script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+
 <section class="hero">
   <div>
-    <h1>Get QuantaThermo XLSXs</h1>
-    <p>Room-temperature benchmarks typically align within ~0.1–0.5% of CCCBDB at p° = 1&nbsp;bar. Linear rotors use the <b>exact J-sum</b>; non-linears use the <b>classical rigid-rotor</b>. Full electronic partition functions included.</p>
-    <p class="kicker">XLSX columns match the website: S, C<sub>p</sub>, C<sub>v</sub>, U, H, G vs. T (+ method &amp; reference state notes).</p>
+    <h1>Download an XLSX for a Single Molecule</h1>
+    <p class="kicker">Instant delivery after payment. Each file contains S, C<sub>p</sub>, C<sub>v</sub>, U, H, G vs. T with units and method notes.</p>
   </div>
 </section>
 
-<!-- Pricing -->
-<section class="pricing">
-  <!-- Single XLSX -->
-  <div class="plan card">
-    <div class="hd">
-      <div class="title">Single XLSX</div>
-      <div class="price">$9<span class="per">one&#8209;time</span></div>
-    </div>
-    <div class="bd">
-      <ul>
-        <li><i>✅</i> One molecule, one method (e.g., CO J-sum)</li>
-        <li><i>📄</i> Adjustable parameters (e.g., T or p)</li>
-        <li><i>🧮</i> Full qₑₗ contributions included</li>
-        <li><i>🔬</i> Ready for homework, labs, and research notes</li>
-      </ul>
-      <a id="buy-single" class="btn btn-primary btn-block" href="#" rel="nofollow">Buy Single XLSX</a>
-      <div class="tiny">Instant download after payment</div>
-    </div>
-  </div>
+<section class="wrap">
+  <div class="page-card">
+    <label for="molecule" class="kicker" style="display:block;margin-bottom:8px;">Select molecule</label>
+    <select id="molecule" style="width:100%;max-width:420px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;">
+      <option value="" selected disabled>Choose a molecule…</option>
+      <option value="CH4">CH₄ (Methane)</option>
+      <option value="H2O">H₂O (Water)</option>
+      <option value="CO">CO (Carbon monoxide)</option>
+      <option value="CF4">CF₄ (Carbon tetrafluoride)</option>
+      <option value="CCl4">CCl₄ (Carbon tetrachloride)</option>
+      <option value="SF6">SF₆ (Sulfur hexafluoride)</option>
+      <option value="BF3">BF₃ (Boron trifluoride)</option>
+      <option value="BCl3">BCl₃ (Boron trichloride)</option>
+      <option value="CH3OH">CH₃OH (Methanol)</option>
+      <option value="C2H5OH">C₂H₅OH (Ethanol)</option>
+      <option value="C2H4">C₂H₄ (Ethylene)</option>
+      <option value="C3H8">C₃H₈ (Propane)</option>
+      <option value="nC4H10">n-C₄H₁₀ (n-Butane)</option>
+      <option value="NO2">NO₂ (Nitrogen dioxide)</option>
+      <option value="CH3OCH3">CH₃OCH₃ (Dimethyl ether)</option>
+    </select>
 
-  <!-- All XLSX bundle -->
-  <div class="plan card" style="outline:2px solid rgba(37,99,235,.10)">
-    <div class="hd">
-      <div class="title">All XLSX bundle <span class="badge">Best value</span></div>
-      <div class="price">$29<span class="per">one&#8209;time</span></div>
+    <div style="margin-top:14px;display:flex;gap:10px;align-items:center;">
+      <a id="buy-one" class="btn btn-primary lemonsqueezy-button" href="#" aria-disabled="true">Buy XLSX — $9</a>
+      <span id="hint" class="kicker">Pick a molecule to enable checkout.</span>
     </div>
-    <div class="bd">
-      <ul>
-        <li><i>📦</i> CO (J-sum), O₂ (J-sum), CH₄ (classical), H₂O (classical), NH₃ (classical)</li>
-        <li><i>📄</i> Adjustable parameters (e.g., T or p)</li>
-        <li><i>🧮</i> Full qₑₗ contributions included</li>
-        <li><i>🔬</i> Ready for homework, labs, and research notes</li>
-      </ul>
-      <a id="buy-bundle" class="btn btn-primary btn-block" href="#" rel="nofollow">Buy All XLSXs</a>
-      <div class="tiny">Instant download after payment</div>
-    </div>
-  </div>
 
-  <!-- Custom molecule -->
-  <div class="plan card">
-    <div class="hd">
-      <div class="title">Custom molecule</div>
-      <div class="price">$35<span class="per">one&#8209;time</span></div>
-    </div>
-    <div class="bd">
-      <ul>
-        <li><i>🧪</i> You provide constants &amp; method (linear J-sum / non-linear classical)</li>
-        <li><i>🧷</i> We validate inputs for consistency</li>
-        <li><i>🔗</i> Delivery by private download link</li>
-        <li><i>⚡</i> <span class="oneline"><b>Ready-to-go:</b> Commonly requested molecules such as CO₂, O₃, PF₅, and CCl₄ available upon instant delivery ($35)</span></li>
-      </ul>
-      <a id="buy-custom" class="btn btn-primary btn-block" href="#" rel="nofollow">Order Custom XLSX</a>
-      <div class="tiny muted">
-        One revision included for <b>customer-supplied parameter typos</b>; if <i>we</i> make a mistake, corrections are free.
-        Have details handy: σ, rotational constants (cm⁻¹), vibrational fundamentals (cm⁻¹) with degeneracies,
-        and electronic terms (g, T<sub>e</sub> in cm⁻¹) if any.
-      </div>
-    </div>
+    <p class="note" style="margin-top:12px">
+      Method: RRHO ideal gas; linear rotors use exact J-sum; non-linear rotors use classical rigid-rotor;
+      full electronic partition function; p° = 1 bar.
+    </p>
   </div>
 </section>
+
+<script>
+  // Map molecules to Lemon Squeezy checkout URLs (variants)
+  const LS = {
+    CH4:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH4",
+    H2O:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_H2O",
+    CO:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CO",
+    CF4:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CF4",
+    CCl4:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CCL4",
+    SF6:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_SF6",
+    BF3:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BF3",
+    BCl3:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BCL3",
+    CH3OH:    "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3OH",
+    C2H5OH:   "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C2H5OH",
+    C2H4:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C2H4",
+    C3H8:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C3H8",
+    nC4H10:   "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NC4H10",
+    NO2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NO2",
+    CH3OCH3:  "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3OCH3",
+  };
+
+  const sel  = document.getElementById('molecule');
+  const btn  = document.getElementById('buy-one');
+  const hint = document.getElementById('hint');
+
+  function updateLink(){
+    const key = sel.value;
+    const url = LS[key];
+    if (url){
+      btn.href = url;
+      btn.removeAttribute('aria-disabled');
+      btn.classList.remove('btn-outline');
+      hint.textContent = "Opens secure Lemon Squeezy checkout.";
+    } else {
+      btn.href = "#";
+      btn.setAttribute('aria-disabled', 'true');
+      btn.classList.add('btn-outline');
+      hint.textContent = "Pick a molecule to enable checkout.";
+    }
+  }
+  sel.addEventListener('change', updateLink);
+  updateLink();
+</script>
 
 <!-- Details / FAQ -->
 <section class="info">
