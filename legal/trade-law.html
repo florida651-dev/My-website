@@ -17,8 +17,6 @@
     body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
     a{color:var(--accent);text-decoration:none}
     img{max-width:100%;height:auto}
-
-    /* Header / Nav */
     header{display:flex;align-items:center;justify-content:space-between;max-width:1040px;margin:24px auto;padding:0 16px;gap:10px}
     .brand{display:flex;align-items:center;font-weight:800;letter-spacing:.2px}
     .brand-logo{height:28px;width:28px;margin-right:8px;border-radius:6px}
@@ -26,18 +24,12 @@
     .nav a:hover{color:var(--ink)}
     .nav a[aria-current="page"]{font-weight:800;color:var(--ink-strong)}
     #menuBtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;display:none}
-
-    /* Card */
     .page{max-width:1040px;margin:18px auto;padding:0 16px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.08);padding:24px}
     h1{margin:.2rem 0 .6rem;color:var(--ink-strong)}
     h2{margin:1.1rem 0 .4rem}
     .kicker{color:var(--muted);font-size:14px;margin-top:10px}
-
-    /* Footer */
     footer{max-width:1040px;margin:40px auto;padding:18px 16px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;font-size:14px;border-top:1px solid var(--line)}
-
-    /* Responsive */
     @media (max-width:720px){
       .nav{display:none}
       .nav.nav--open{display:block}
@@ -46,8 +38,6 @@
       .card{padding:16px}
       footer{flex-direction:column;align-items:flex-start;gap:8px}
     }
-
-    /* Dark mode */
     @media (prefers-color-scheme: dark){
       :root{ --bg:#0b1220;--card:#0f172a;--ink:#e5e7eb;--muted:#94a3b8;--accent:#60a5fa;--line:#1f2937;--ink-strong:#f3f4f6;--btn:#3b82f6;--btn-ink:#fff;--btn-outline:#2b3647; }
       body{background:var(--bg)}
@@ -72,31 +62,51 @@
 </header>
 
 <main class="page">
- <section class="card" aria-label="Legal & Compliance">
-  <h1>Sales & Compliance (Merchant of Record)</h1>
+  <section class="card" aria-label="Legal & Compliance">
+    <h1>Sales & Compliance (Merchant of Record)</h1>
 
-  <p><strong>Sales are processed by Lemon Squeezy (Merchant of Record).</strong>
-     Lemon Squeezy is the seller of record and handles taxes, payment processing,
-     refunds, and chargebacks for purchases made via our checkout.</p>
+    <p><strong>Sales are processed by Lemon Squeezy (Merchant of Record).</strong> Lemon Squeezy is the seller of record and handles taxes, payment processing, refunds, and chargebacks for purchases made via our checkout.</p>
 
-  <h2>Contact</h2>
-  <p>
-    <strong>Email:</strong> <a href="mailto:info@thermocalc.site">info@thermocalc.site</a><br>
-    <strong>Website:</strong> <a href="https://thermocalc.site/">https://thermocalc.site/</a>
-  </p>
+    <h2>Contact</h2>
+    <p>
+      <strong>Email:</strong> <a href="mailto:info@thermocalc.site">info@thermocalc.site</a><br>
+      <strong>Website:</strong> <a href="https://thermocalc.site/">https://thermocalc.site/</a>
+    </p>
 
-  <!-- Removed the Japan customers section -->
+    <h2>Product &amp; fulfillment</h2>
+    <p>
+      <strong>Price:</strong> USD $9 (any applicable taxes handled at checkout).<br>
+      <strong>Fees other than price:</strong> none.<br>
+      <strong>Payment method &amp; timing:</strong> methods provided by Lemon Squeezy; payment is charged at order time.<br>
+      <strong>Delivery:</strong> instant download after successful payment.<br>
+      <strong>Refunds:</strong> defective—full refund; non-defective—non-refundable.<br>
+      <strong>System requirements:</strong> modern browser (latest Chrome, Safari, Firefox, Edge) and internet connection.
+    </p>
 
-  <h2>Product &amp; fulfillment</h2>
-  <p>
-    <strong>Prices:</strong> USD $9–$35 (any applicable taxes handled at checkout).<br>
-    <strong>Fees other than price:</strong> none.<br>
-    <strong>Payment method &amp; timing:</strong> methods provided by Lemon Squeezy; payment is charged at order time.<br>
-    <strong>Delivery:</strong> instant download for standard sets; within one week for custom requests.<br>
-    <strong>Refunds:</strong> defective—full refund; non-defective—non-refundable.<br>
-    <strong>System requirements:</strong> modern browser (latest Chrome, Safari, Firefox, Edge) and internet connection.
-  </p>
+    <p class="kicker">This page explains how sales and compliance are handled for purchases made through our Lemon Squeezy checkout.</p>
+  </section>
+</main>
 
-  <p class="kicker">This page explains how sales and compliance are handled for purchases made through our Lemon Squeezy checkout.</p>
-</section>
+<footer>
+  <div>© <span id="yr"></span> QuantaThermo. All rights reserved.</div>
+  <div>Values computed from validated statistical thermodynamics models.</div>
+</footer>
 
+<script>
+  (function(){
+    const btn=document.getElementById('menuBtn');
+    const nav=document.querySelector('nav.nav');
+    if(!btn||!nav) return;
+    const mq=window.matchMedia('(max-width: 720px)');
+    function apply(){ btn.style.display=mq.matches?'inline-block':'none'; if(!mq.matches) nav.classList.remove('nav--open'); }
+    mq.addEventListener('change',apply); apply();
+    btn.addEventListener('click',()=>{
+      const open = nav.classList.toggle('nav--open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  })();
+  document.getElementById('yr').textContent=new Date().getFullYear();
+</script>
+
+</body>
+</html>
