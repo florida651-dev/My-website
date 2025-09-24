@@ -42,30 +42,6 @@
     .btn-outline{background:transparent;border:1px solid var(--btn-outline);color:var(--ink)}
     .btn-block{width:100%;text-align:center}
 
-    .pricing{max-width:1040px;margin:18px auto;padding:0 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    @media (max-width:960px){ .pricing{grid-template-columns:1fr} }
-    .plan{border-radius:16px;border:1px solid var(--line);overflow:hidden}
-    .plan .hd{padding:18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-    .plan .title{font-weight:800;color:var(--ink-strong)}
-    .badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px}
-    .price{font-size:28px;font-weight:800;color:var(--ink-strong)}
-    .per{font-size:14px;color:var(--muted);font-weight:600;margin-left:4px}
-    .plan .bd{padding:18px}
-    .plan ul{margin:0 0 12px 0;padding:0;list-style:none}
-    .plan li{display:flex;gap:8px;align-items:flex-start;margin:.45rem 0;color:var(--ink)}
-    .plan li i{flex:0 0 auto;font-style:normal}
-    .muted{color:var(--muted)}
-    .tiny{font-size:12px;color:var(--muted);margin-top:8px}
-    .plan .hd .price{display:flex;align-items:baseline;gap:4px;white-space:nowrap;flex:0 0 auto}
-    .plan .hd .price .per{white-space:nowrap;word-break:keep-all;overflow-wrap:normal}
-
-    /* ready-to-go: always readable */
-    .oneline{
-      white-space:normal;
-      overflow:visible;
-      text-overflow:unset;
-    }
-
     .info{max-width:1040px;margin:18px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width:960px){ .info{grid-template-columns:1fr} }
     .info h3{margin:.2rem 0 .6rem}
@@ -79,7 +55,6 @@
       .nav.nav--open{display:block}
       .nav a{display:block;padding:10px 0;margin:0}
       #menuBtn{display:inline-block}
-      .plan .bd a.btn{width:100%;display:block}
     }
     @media (max-width:560px){
       .card.pad,.page-card{padding:16px}
@@ -90,25 +65,25 @@
       :root{ --bg:#0b1220;--card:#0f172a;--ink:#e5e7eb;--muted:#94a3b8;--accent:#60a5fa;--line:#1f2937;--ink-strong:#f3f4f6;--btn:#3b82f6;--btn-ink:#fff;--btn-outline:#2b3647; }
       body{background:var(--bg)}
     }
+    :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
   </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <img src="/logo.png" alt="ThermoCalc logo" class="brand-logo" loading="lazy" width="28" height="28">
+    <img src="/logo.png" alt="QuantaThermo logo" class="brand-logo" loading="lazy" width="28" height="28">
     QuantaThermo
   </div>
   <button id="menuBtn" aria-label="Toggle navigation">☰</button>
-<nav class="nav">
-  <a href="/">Home</a>
-  <a href="/methods.html">Methods &amp; Validation</a>
-  <a href="/purchase.html" aria-current="page">Purchase</a>
-  <a href="/legal/trade-law.html" id="nav-legal">Legal Notice</a>
-</nav>
-
-
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a href="/methods.html">Methods &amp; Validation</a>
+    <a href="/purchase.html" aria-current="page">Purchase</a>
+    <a href="/legal/trade-law.html" id="nav-legal">Legal Notice</a>
+  </nav>
 </header>
 
+<!-- Lemon Squeezy overlay -->
 <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
 
 <section class="hero">
@@ -209,21 +184,21 @@
   <div class="card pad">
     <h3>How delivery works</h3>
     <ul class="list">
-      <li><b>Single / Bundle:</b> Stripe redirects to your download page with your files.</li>
-      <li><b>Custom:</b> After checkout, you’ll submit a short form. We email a private link when ready.</li>
+      <li><b>Checkout:</b> processed by Lemon Squeezy (Merchant of Record).</li>
+      <li><b>Delivery:</b> your selected molecule’s XLSX downloads <b>immediately after payment</b>.</li>
+      <li><b>Receipts:</b> you’ll receive a Lemon Squeezy receipt and a download email.</li>
       <li>Links can be time-limited for security; keep your files locally.</li>
     </ul>
-    <p class="note">Need a receipt or refund? Use the Stripe receipt or reply to your order email.</p>
+    <p class="note">Need a receipt or refund? Use your Lemon Squeezy receipt or reply to your order email.</p>
   </div>
 </section>
 
 <section class="wrap">
   <div class="page-card">
     <p class="kicker">
-      Questions or a molecule you want added? Reach out via the
-      <a href="/purchase.html">Purchase</a> page or
-      <a href="mailto:info@thermocalc.site">info@thermocalc.site</a> —
-      we’re happy to validate more species on request.
+      Want a molecule not listed? Request it at
+      <a href="mailto:info@thermocalc.site?subject=Custom%20molecule%20request">info@thermocalc.site</a>.
+      (Custom work is quoted via email and is not sold through the store.)
     </p>
   </div>
 </section>
@@ -243,15 +218,6 @@
     mq.addEventListener('change',apply); apply();
     btn.addEventListener('click',()=>nav.classList.toggle('nav--open'));
   })();
-
-  // Stripe links (replace with real links when ready)
-  const STRIPE_SINGLE="https://buy.stripe.com/your_single_csv";
-  const STRIPE_BUNDLE="https://buy.stripe.com/your_all_csv_bundle";
-  const STRIPE_CUSTOM="https://buy.stripe.com/your_custom_molecule";
-  document.getElementById('buy-single').href=STRIPE_SINGLE;
-  document.getElementById('buy-bundle').href=STRIPE_BUNDLE;
-  document.getElementById('buy-custom').href=STRIPE_CUSTOM;
-
   document.getElementById('yr').textContent=new Date().getFullYear();
 </script>
 </body>
