@@ -99,26 +99,54 @@
     <select id="molecule" style="width:100%;max-width:420px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;">
       <option value="" selected disabled>Choose a molecule…</option>
 
-      <option value="CH4">CH₄ (Methane)</option>
-      <option value="H2O">H₂O (Water)</option>
-      <option value="CO">CO (Carbon monoxide)</option>
-      <option value="CF4">CF₄ (Carbon tetrafluoride)</option>
-      <option value="CCl4">CCl₄ (Carbon tetrachloride)</option>
-      <option value="SF6">SF₆ (Sulfur hexafluoride)</option>
-      <option value="BF3">BF₃ (Boron trifluoride)</option>
-      <option value="BCl3">BCl₃ (Boron trichloride)</option>
-      <option value="CH3OH">CH₃OH (Methanol)</option>
-      <option value="C2H5OH">C₂H₅OH (Ethanol)</option>
-      <option value="C2H4">C₂H₄ (Ethylene)</option>
-      <option value="C3H8">C₃H₈ (Propane)</option>
-      <option value="NO2">NO₂ (Nitrogen dioxide)</option>
-      <option value="CH3OCH3">CH₃OCH₃ (Dimethyl ether)</option>
-
-      <!-- New additions -->
-      <option value="Ar">Ar (Argon)</option>
-      <option value="HI">HI (Hydrogen iodide)</option>
-      <option value="Br2">Br₂ (Bromine)</option>
-      <option value="NF3">NF₃ (Nitrogen trifluoride)</option>
+      <option value="CH3COCH3">Acetone — CH₃COCH₃</option>
+      <option value="CH3CN">Acetonitrile — CH₃CN</option>
+      <option value="NH3">Ammonia — NH₃</option>
+      <option value="Ar">Argon — Ar</option>
+      <option value="C6H6">Benzene — C₆H₆</option>
+      <option value="BCl3">Boron Trichloride — BCl₃</option>
+      <option value="BF3">Boron Trifluoride — BF₃</option>
+      <option value="Br2">Bromine — Br₂</option>
+      <option value="BrCl">Bromine Monochloride — BrCl</option>
+      <option value="CO2">Carbon Dioxide — CO₂</option>
+      <option value="CS2">Carbon Disulfide — CS₂</option>
+      <option value="CO">Carbon Monoxide — CO</option>
+      <option value="CCl4">Carbon Tetrachloride — CCl₄</option>
+      <option value="CF4">Carbon Tetrafluoride — CF₄</option>
+      <option value="COCl2">Carbonyl Chloride (Phosgene) — COCl₂</option>
+      <option value="COF2">Carbonyl Fluoride — COF₂</option>
+      <option value="OCS">Carbonyl Sulfide — OCS</option>
+      <option value="Cl2">Chlorine — Cl₂</option>
+      <option value="CH3OCH3">Dimethyl Ether — CH₃OCH₃</option>
+      <option value="CH3CHO">Ethanal (Acetaldehyde) — CH₃CHO</option>
+      <option value="C2H6">Ethane — C₂H₆</option>
+      <option value="C2H5OH">Ethanol — C₂H₅OH</option>
+      <option value="C2H4">Ethylene — C₂H₄</option>
+      <option value="F2">Fluorine — F₂</option>
+      <option value="H2">Hydrogen — H₂</option>
+      <option value="HBr">Hydrogen Bromide — HBr</option>
+      <option value="HCl">Hydrogen Chloride — HCl</option>
+      <option value="HCN">Hydrogen Cyanide — HCN</option>
+      <option value="HF">Hydrogen Fluoride — HF</option>
+      <option value="HI">Hydrogen Iodide — HI</option>
+      <option value="H2O2">Hydrogen Peroxide — H₂O₂</option>
+      <option value="H2S">Hydrogen Sulfide — H₂S</option>
+      <option value="CH2O">Methanal (Formaldehyde) — CH₂O</option>
+      <option value="CH4">Methane — CH₄</option>
+      <option value="CH3OH">Methanol — CH₃OH</option>
+      <option value="NO">Nitric Oxide — NO</option>
+      <option value="N2">Nitrogen — N₂</option>
+      <option value="NO2">Nitrogen Dioxide — NO₂</option>
+      <option value="NF3">Nitrogen Trifluoride — NF₃</option>
+      <option value="N2O">Nitrous Oxide — N₂O</option>
+      <option value="O2">Oxygen — O₂</option>
+      <option value="O3">Ozone — O₃</option>
+      <option value="PF5">Phosphorus Pentafluoride — PF₅</option>
+      <option value="C3H8">Propane — C₃H₈</option>
+      <option value="SO2">Sulfur Dioxide — SO₂</option>
+      <option value="SF6">Sulfur Hexafluoride — SF₆</option>
+      <option value="SO3">Sulfur Trioxide — SO₃</option>
+      <option value="H2O">Water — H₂O</option>
     </select>
 
     <div style="margin-top:14px;display:flex;gap:10px;align-items:center;">
@@ -135,27 +163,56 @@
 
 <script>
   // Map molecules to Lemon Squeezy checkout URLs (variants)
+  // Replace each VARIANT_* with your actual variant URLs.
   const LS = {
-    CH4:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH4",
-    H2O:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_H2O",
-    CO:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CO",
-    CF4:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CF4",
-    CCl4:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CCL4",
-    SF6:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_SF6",
-    BF3:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BF3",
+    CH3COCH3: "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3COCH3",
+    CH3CN:    "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3CN",
+    NH3:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NH3",
+    Ar:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_AR",
+    C6H6:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C6H6",
     BCl3:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BCL3",
-    CH3OH:    "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3OH",
+    BF3:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BF3",
+    Br2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BR2",
+    BrCl:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BRCL",
+    CO2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CO2",
+    CS2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CS2",
+    CO:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CO",
+    CCl4:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CCL4",
+    CF4:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CF4",
+    COCl2:    "https://store.lemonsqueezy.com/checkout/buy/VARIANT_COCL2",
+    COF2:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_COF2",
+    OCS:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_OCS",
+    Cl2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CL2",
+    CH3OCH3:  "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3OCH3",
+    CH3CHO:   "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3CHO",
+    C2H6:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C2H6",
     C2H5OH:   "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C2H5OH",
     C2H4:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C2H4",
-    C3H8:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C3H8",
-    NO2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NO2",
-    CH3OCH3:  "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3OCH3",
-
-    // New additions
-    Ar:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_AR",
+    F2:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_F2",
+    H2:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_H2",
+    HBr:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_HBR",
+    HCl:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_HCL",
+    HCN:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_HCN",
+    HF:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_HF",
     HI:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_HI",
-    Br2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BR2",
+    H2O2:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_H2O2",
+    H2S:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_H2S",
+    CH2O:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH2O",
+    CH4:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH4",
+    CH3OH:    "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3OH",
+    NO:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NO",
+    N2:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_N2",
+    NO2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NO2",
     NF3:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NF3",
+    N2O:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_N2O",
+    O2:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_O2",
+    O3:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_O3",
+    PF5:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_PF5",
+    C3H8:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C3H8",
+    SO2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_SO2",
+    SF6:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_SF6",
+    SO3:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_SO3",
+    H2O:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_H2O"
   };
 
   const sel  = document.getElementById('molecule');
