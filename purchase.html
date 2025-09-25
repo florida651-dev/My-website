@@ -98,6 +98,7 @@
     <label for="molecule" class="kicker" style="display:block;margin-bottom:8px;">Select molecule</label>
     <select id="molecule" style="width:100%;max-width:420px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;">
       <option value="" selected disabled>Choose a molecule…</option>
+
       <option value="CH4">CH₄ (Methane)</option>
       <option value="H2O">H₂O (Water)</option>
       <option value="CO">CO (Carbon monoxide)</option>
@@ -110,9 +111,14 @@
       <option value="C2H5OH">C₂H₅OH (Ethanol)</option>
       <option value="C2H4">C₂H₄ (Ethylene)</option>
       <option value="C3H8">C₃H₈ (Propane)</option>
-      <option value="nC4H10">n-C₄H₁₀ (n-Butane)</option>
       <option value="NO2">NO₂ (Nitrogen dioxide)</option>
       <option value="CH3OCH3">CH₃OCH₃ (Dimethyl ether)</option>
+
+      <!-- New additions -->
+      <option value="Ar">Ar (Argon)</option>
+      <option value="HI">HI (Hydrogen iodide)</option>
+      <option value="Br2">Br₂ (Bromine)</option>
+      <option value="NF3">NF₃ (Nitrogen trifluoride)</option>
     </select>
 
     <div style="margin-top:14px;display:flex;gap:10px;align-items:center;">
@@ -142,9 +148,14 @@
     C2H5OH:   "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C2H5OH",
     C2H4:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C2H4",
     C3H8:     "https://store.lemonsqueezy.com/checkout/buy/VARIANT_C3H8",
-    nC4H10:   "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NC4H10",
     NO2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NO2",
     CH3OCH3:  "https://store.lemonsqueezy.com/checkout/buy/VARIANT_CH3OCH3",
+
+    // New additions
+    Ar:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_AR",
+    HI:       "https://store.lemonsqueezy.com/checkout/buy/VARIANT_HI",
+    Br2:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_BR2",
+    NF3:      "https://store.lemonsqueezy.com/checkout/buy/VARIANT_NF3",
   };
 
   const sel  = document.getElementById('molecule');
@@ -222,4 +233,3 @@
 </script>
 </body>
 </html>
-
